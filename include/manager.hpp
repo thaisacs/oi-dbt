@@ -88,6 +88,10 @@ namespace dbt {
       void runPipeline();
 
     public:
+      std::mutex BRFT;
+      std::condition_variable cvRFT;
+      std::atomic<bool> isCompiling;
+      
       Manager(uint32_t DMO, dbt::Machine& M, bool VO = false, bool Inline = false) : DataMemOffset(DMO), isRunning(true),
           isFinished(false), VerboseOutput(VO), TheMachine(M), NumOfOIRegions(0), IsToInline(Inline) {
         NativeRegions = new uint64_t[NATIVE_REGION_SIZE];
@@ -113,14 +117,21 @@ namespace dbt {
       ~Manager() {
         // Alert threads to stop
         isRunning = false;
+        cv.notify_all();
 
         // Waits the thread finish
         if (ThreadPool.size() != 0) {
           while (!isFinished) {}
 
           for (unsigned i = 0; i < ThreadPool.size(); i++) 
-            	ThreadPool[i].detach();
+            	ThreadPool[i].join();
         }
+
+        for (auto& M : IRRegions) {
+          delete M.second;
+        }
+        
+        delete NativeRegions;
       }
 
       void setOptPolicy(OptPolitic OM) {

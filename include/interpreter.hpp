@@ -1,3 +1,5 @@
+#pragma once
+
 #include <OIDecoder.hpp>
 #include <machine.hpp>
 #include <syscall.hpp>

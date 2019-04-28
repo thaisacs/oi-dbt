@@ -92,9 +92,12 @@ void Manager::runPipeline() {
   while (isRunning) {
     uint32_t EntryAddress;
     OIInstList OIRegion;
-    
+   
     std::unique_lock<std::mutex> lk(NR);
-    cv.wait(lk, [&]{ return getNumOfOIRegions() != 0; });
+    cv.wait(lk, [&]{ return getNumOfOIRegions() != 0 || !isRunning; });
+
+    if(!isRunning)
+      continue;
 
     OIRegionsMtx.lock_shared();
     EntryAddress = OIRegionsKey.front();
@@ -112,10 +115,8 @@ void Manager::runPipeline() {
       Module = loadRegionFromFile("r"+std::to_string(EntryAddress)+".bc");
 
     std::vector<uint32_t> EntryAddresses = {EntryAddress};
-
+    
     if (Module == nullptr) {
-      if (!isRunning) return;
-
       CompiledOIRegionsMtx.lock();
       CompiledOIRegions[EntryAddress] = OIRegion;
       CompiledOIRegionsMtx.unlock();
@@ -153,13 +154,12 @@ void Manager::runPipeline() {
         for (auto& BB : F)
           Size += BB.size();
 
-      if (!isRunning) return;
+      std::cout << "Size: " << Size << std::endl;
 
-
-      if (OptMode != OptPolitic::Custom)
-        IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress);
-      else if (CustomOpts->count(EntryAddress) != 0)
-        IRO->customOptimizeIRFunction(Module, (*CustomOpts)[EntryAddress]);
+      //if (OptMode != OptPolitic::Custom)
+      //  IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress);
+      //else if (CustomOpts->count(EntryAddress) != 0)
+      //  IRO->customOptimizeIRFunction(Module, (*CustomOpts)[EntryAddress]);
 
       if (VerboseOutput)
         Module->print(llvm::errs(), nullptr);
@@ -167,6 +167,8 @@ void Manager::runPipeline() {
       for (auto& F : *Module)
         for (auto& BB : F)
           OSize += BB.size();
+      
+      std::cout << "OSize: " << OSize << std::endl;
     }
 
     // Remove a region if the first instruction is a return <- can cause infinity loops
@@ -188,8 +190,6 @@ void Manager::runPipeline() {
     }
 
     if (!IsRet || !RetLoop) {
-      if (!isRunning) return;
-
       IRRegions[EntryAddress] = llvm::CloneModule(*Module).release();
       IRRegionsKey.push_back(EntryAddress);
 
@@ -244,6 +244,8 @@ void Manager::runPipeline() {
     NumOfOIRegions -= 1;
     OIRegionsKey.erase(OIRegionsKey.begin());
     OIRegionsMtx.unlock();
+    
+    cvRFT.notify_all();
 
 		if (IsToDoWholeCompilation) {
 			isFinished = true;

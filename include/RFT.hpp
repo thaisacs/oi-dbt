@@ -39,7 +39,9 @@ namespace dbt {
     void insertInstruction(std::array<uint32_t, 2>&);
     bool hasRecordedAddrs(uint32_t);
   public:
-    RFT(Manager& M) : TheManager(M) {};
+    RFT(Manager& M) : TheManager(M) {
+      memset(ExecFreq, 0, 1000000);
+    };
 
     ~RFT() {}
 

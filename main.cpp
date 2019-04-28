@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <machine.hpp>
+#include <machineModel.hpp>
 
 clarg::argString RFTFlag("-rft", "Region Formation Technique (net)", "netplus-e-r");
 clarg::argInt    HotnessFlag("-hot", "Hotness threshold for the RFTs", 50);
@@ -267,6 +268,6 @@ int main(int argc, char** argv) {
 
   signal(SIGSEGV, doNothingHandler);
   signal(SIGABRT, doNothingHandler);
-
-  exit(SyscallM->getExitStatus());
+  
+  return SyscallM->getExitStatus();
 }
