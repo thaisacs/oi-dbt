@@ -20,6 +20,7 @@ namespace dbt {
     MachineModel() {
       TheMachine = std::make_unique<dbt::Machine>();
     }
-    double runOnMachine(const std::string&);
+    double runOnMachine(std::vector<uint16_t> Genes, unsigned RegionID, 
+        const std::string&, const std::string&, const std::string&);
   };
 }

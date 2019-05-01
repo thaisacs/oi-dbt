@@ -1,0 +1,47 @@
+# AOS Configuration File
+
+updateDatabase: true
+
+database: test/
+
+# SECTION 1: Iterative Compilation
+
+icStrategy: GA 
+icStrategyParams:
+  populationSize: 20 
+  generations: 5
+  mutationRate: 0.018
+  compileWeight: 0.1
+  executionWeight: 0.9
+  times: 1
+  max: 25
+  min: 5
+
+createDatabase: false 
+
+training: true 
+
+# SECTION 2: Machine Learning
+
+# Machine learning strategy
+mcStrategy: CBR 
+#  - (CBR) Case-based reasoning
+#  - (DPL) Deep learning
+#  - (RFL) Reinforcement learning
+#  - (LTL) Long-term learning
+ 
+characterization: DNA
+#  - (DNA) DNA-based approach (only the OpenISA instructions)
+#  - (DND) DNA-based approach (OpenISA instructions + data type) ????
+#  - (FLL) The complete region
+#
+similarity: NaW
+#  - (NaW) Needleman-Wunsch algoritm
+#  - (CMP) Compress
+
+retrieving: JUST
+#  - ELITE
+#  - JUST
+#  - NEARLY
+
+invokeIC: false

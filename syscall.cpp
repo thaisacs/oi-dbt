@@ -35,7 +35,8 @@ int LinuxSyscallManager::processSyscall(Machine& M) {
   switch (SysTy) {
   case SyscallType::Exit:
     ExitStatus = M.getRegister(2);
-    std::cerr << "Exiting with status " << (uint32_t) ExitStatus << " (" << M.getRegister(2) << ")\n";
+    if(!ROIMode)
+      std::cerr << "Exiting with status " << (uint32_t) ExitStatus << " (" << M.getRegister(2) << ")\n";
     return 1;
   case SyscallType::Fstat: {
     //int r = fstat(M.getRegister(5), (struct stat*) (M.getByteMemoryPtr() + (M.getRegister(6) - M.getDataMemOffset())));
@@ -52,7 +53,11 @@ int LinuxSyscallManager::processSyscall(Machine& M) {
     return 0;
   }
   case SyscallType::Write: {
-    ssize_t r = write(M.getRegister(5), (M.getByteMemoryPtr() + (M.getRegister(6) - M.getDataMemOffset())), M.getRegister(7));
+    size_t r;
+    if(ROIMode)
+      r = M.getRegister(7);
+    else
+      r = write(M.getRegister(5), (M.getByteMemoryPtr() + (M.getRegister(6) - M.getDataMemOffset())), M.getRegister(7));
     M.setRegister(2, r);
     return 0;
   }

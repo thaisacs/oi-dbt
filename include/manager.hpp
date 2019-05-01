@@ -15,6 +15,9 @@
 #include <unistd.h>
 #include <chrono>
 
+#include <AOS.hpp>
+#include <util.hpp>
+
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Bitcode/BitcodeWriter.h"
 
@@ -22,6 +25,10 @@
 #define NATIVE_REGION_SIZE 100000000
 
 namespace dbt {
+  struct ROIInfo {
+    unsigned RegionID;
+    std::vector<uint16_t> Opts;
+  };
   class IREmitter;
   class Machine;
   class Manager {
@@ -31,6 +38,8 @@ namespace dbt {
     private:
       llvm::LLVMContext TheContext;
       dbt::Machine& TheMachine;
+      dbt::AOS& TheAOS;
+      
       std::string RegionPath;
 
       std::vector<uint32_t> OIRegionsKey;
@@ -71,8 +80,14 @@ namespace dbt {
       float AvgOptCodeSize = 0;
 
       bool VerboseOutput = false;
+      bool LockMode = false;
+      bool ROIMode = false;
 
-			std::unordered_map<uint32_t, llvm::Module*> ModulesLoaded;
+      ROIInfo ROI;
+
+      std::vector<uint64_t> RegionTimes; 
+
+      std::unordered_map<uint32_t, llvm::Module*> ModulesLoaded;
       bool IsToLoadRegions = false;
       bool IsToDoWholeCompilation = false;
       bool IsToLoadBCFormat = true;
@@ -91,9 +106,9 @@ namespace dbt {
       std::mutex BRFT;
       std::condition_variable cvRFT;
       std::atomic<bool> isCompiling;
-      
-      Manager(uint32_t DMO, dbt::Machine& M, bool VO = false, bool Inline = false) : DataMemOffset(DMO), isRunning(true),
-          isFinished(false), VerboseOutput(VO), TheMachine(M), NumOfOIRegions(0), IsToInline(Inline) {
+
+      Manager(uint32_t DMO, dbt::Machine& M, dbt::AOS& A, bool VO = false, bool Inline = false) : DataMemOffset(DMO), isRunning(true),
+      isFinished(false), VerboseOutput(VO), TheMachine(M), TheAOS(A), NumOfOIRegions(0), IsToInline(Inline) {
         NativeRegions = new uint64_t[NATIVE_REGION_SIZE];
         memset((void*) NativeRegions, 0, sizeof(NativeRegions));
       }
@@ -124,13 +139,13 @@ namespace dbt {
           while (!isFinished) {}
 
           for (unsigned i = 0; i < ThreadPool.size(); i++) 
-            	ThreadPool[i].join();
+            ThreadPool[i].join();
         }
 
         for (auto& M : IRRegions) {
           delete M.second;
         }
-        
+
         delete NativeRegions;
       }
 
@@ -142,6 +157,42 @@ namespace dbt {
         CustomOpts = COpts;
         OptMode = Custom;
       }
+
+      void setLockMode() {
+        LockMode = true;
+      }
+
+      bool getLockMode() {
+        return LockMode;
+      }
+
+      void setROI(ROIInfo R) {
+        ROI = R;
+      }
+
+      ROIInfo getROI() {
+        return ROI;
+      }
+
+      void setROIMode() {
+        ROIMode = true;
+      }
+
+      bool getROIMode() {
+        return ROIMode;
+      }
+
+      uint64_t getRegionTime() {
+        uint64_t Time = 0;
+
+        if(!RegionTimes.size())
+          return 0;
+
+        for(int i = 0; i < RegionTimes.size(); i++) {
+          Time += RegionTimes[i];
+        }
+        return ((double) Time)/RegionTimes.size();
+      }  
 
       unsigned getCompiledRegions (void){
         return CompiledRegions;
@@ -214,10 +265,10 @@ namespace dbt {
             if (InstAddr[0] == Addrs)
               return true;
 
-            if(i > OIRegions.size())
-              break;
+          if(i > OIRegions.size())
+            break;
 
-            ++i;
+          ++i;
         }
         return false;
       }
@@ -226,7 +277,7 @@ namespace dbt {
         return CompiledOIRegions[EntryAddrs];
       }
 
-			void loadOIRegionsFromFiles();
+      void loadOIRegionsFromFiles();
 
       void mergeOIRegions();
 

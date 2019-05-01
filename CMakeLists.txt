@@ -15,16 +15,16 @@ set(CMAKE_CXX_ARCHIVE_FINISH   true)
 #SET(CMAKE_AR  "gcc-ar-7")
 #add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 
-include_directories(include)
+include_directories(include AOS/include)
 
 add_subdirectory(RFT)
+add_subdirectory(AOS)
 add_subdirectory(arglib)
 
 add_library(dbt 
   regionMerge.cpp
   IREmitter.cpp 
   IRUtils.cpp 
-  IROpt.cpp 
   OIDecoder.cpp
   interpreter.cpp 
   machine.cpp 
@@ -37,9 +37,10 @@ add_executable(oi-dbt main.cpp)
 
 install(TARGETS oi-dbt RUNTIME DESTINATION bin)
 
-target_link_libraries(oi-dbt
+target_link_libraries(oi-dbt PUBLIC "LLVM-7" ${llvm_libs}
   papi 
   RFT 
+  AOS
   dbt 
   arglib 
   pthread

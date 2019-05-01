@@ -1,0 +1,11 @@
+add_library(AOS
+  AOS.cpp
+  AOSParams.cpp
+  DNA.cpp
+  IROpt.cpp 
+  GASolver.cpp
+  searchSpace.cpp
+  codeAnalyzer.cpp
+  characterization.cpp
+  database.cpp
+  util.cpp)

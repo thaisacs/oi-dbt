@@ -10,8 +10,12 @@
 #include <memory>
 #include <machine.hpp>
 #include <machineModel.hpp>
+#include <AOS.hpp>
+#include <AOSParams.hpp>
 
-clarg::argString RFTFlag("-rft", "Region Formation Technique (net)", "netplus-e-r");
+clarg::argString RFTFlag("-rft", "Region Formation Technique (inet)", "netplus-e-r");
+clarg::argString AOSFlag("-aos", "Adaptive Optimization System file", "");
+clarg::argString ROIFlag("-roi", "Region of investigation", "");
 clarg::argInt    HotnessFlag("-hot", "Hotness threshold for the RFTs", 50);
 clarg::argString ReportFileFlag("-report", "Write down report to a file", "");
 clarg::argBool   InterpreterFlag("-interpret",  "Only interpret.");
@@ -65,6 +69,10 @@ int validateArguments() {
     return 1;
   }
 
+  if (!AOSFlag.was_set()) {
+    cerr << "You must set the path of the aos file which will be usage!\n";
+    return 1;
+  }
   if (!BinaryFlag.was_set()) {
     cerr << "You must set the path of the binary which will be emulated!\n";
     return 1;
@@ -126,6 +134,8 @@ std::unordered_map<uint32_t, std::vector<std::string>>* loadCustomOpts(std::stri
 }
 
 int main(int argc, char** argv) {
+  srand(time(NULL));
+  
   signal(SIGSEGV, sigHandler);
   signal(SIGABRT, sigHandler);
 
@@ -162,7 +172,46 @@ int main(int argc, char** argv) {
     return 2;
   }
 
-  dbt::Manager TheManager(M.getDataMemOffset(), M, VerboseFlag.was_set(), InlineFlag.was_set());
+  dbt::AOS A(AOSFlag.get_value(), BinaryFlag.get_value(), ArgumentsFlag.get_value());
+  dbt::Manager TheManager(M.getDataMemOffset(), M, A, VerboseFlag.was_set(), InlineFlag.was_set());
+
+  if(A.isTraining())
+    TheManager.setLockMode();
+
+  if(ROIFlag.was_set()) {
+    dbt::ROIInfo ROI;
+
+    std::string Info = ROIFlag.get_value();
+
+    unsigned i = 0, Buffer = 0;
+    char c = Info[i];
+
+    ROI.RegionID = 0;
+
+    while(c != ':') {
+      ROI.RegionID = ROI.RegionID * 10 + c - 48;
+      c = Info[++i];
+    }
+
+    c = Info[++i];
+
+    while(i < Info.size()) {
+      if(c == '-') {
+        ROI.Opts.push_back(Buffer);
+        Buffer = 0;
+        c = Info[++i];
+      }
+
+      Buffer = Buffer * 10 + c - 48;
+      c = Info[++i];
+    }
+
+    ROI.Opts.push_back(Buffer);
+
+    TheManager.setROI(ROI);
+    TheManager.setROIMode();
+    TheManager.setLockMode();
+  }
 
   if (LoadRegionsFlag.was_set() || LoadOIFlag.was_set() || WholeCompilationFlag.was_set())
     TheManager.setToLoadRegions(RegionPath.get_value(), (!LoadOIFlag.was_set() && !WholeCompilationFlag.was_set()), WholeCompilationFlag.was_set());
@@ -221,7 +270,11 @@ int main(int argc, char** argv) {
     RftChosen->setRegionLimitSize(RegionLimitSize.get_value());
 
   std::unique_ptr<dbt::SyscallManager> SyscallM;
-  SyscallM = std::make_unique<dbt::LinuxSyscallManager>();
+
+  if(ROIFlag.was_set())
+    SyscallM = std::make_unique<dbt::LinuxSyscallManager>(true);
+  else
+    SyscallM = std::make_unique<dbt::LinuxSyscallManager>(false);
 
   if (PreheatFlag.was_set()) {
     if(M.setCommandLineArguments(ArgumentsFlag.get_value()) < 0)
@@ -268,6 +321,6 @@ int main(int argc, char** argv) {
 
   signal(SIGSEGV, doNothingHandler);
   signal(SIGABRT, doNothingHandler);
-  
+
   return SyscallM->getExitStatus();
 }

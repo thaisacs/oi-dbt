@@ -7,7 +7,10 @@ namespace dbt {
   class SyscallManager {
   protected:
     uint8_t ExitStatus;
+    bool ROIMode;
   public:
+    SyscallManager(bool ROIMode) : ROIMode(ROIMode) {}
+    
     uint8_t getExitStatus() { return ExitStatus; };
 
     virtual int processSyscall(Machine&) = 0;
@@ -15,6 +18,7 @@ namespace dbt {
 
   class LinuxSyscallManager : public SyscallManager {
     public:
+      LinuxSyscallManager(bool ROIMode) : SyscallManager(ROIMode) {}
       enum SyscallType { Exit = 1, Read=0x3, Write = 0x4, Open=0x5, Close=0x6, Creat=0x8, Lseek=0x13, Stat=106, Fstat = 108 };
       int processSyscall(Machine&);
   };

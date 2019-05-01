@@ -11,6 +11,13 @@
 
 using namespace dbt;
 
+static inline uint64_t rdtscp() {
+  uint64_t rax, rdx;
+  uint32_t aux;
+  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
+  return (rdx << 32) + rax;
+}
+
 bool hasAddr(const OIInstList& OIRegion, uint32_t Addr) {
   for (auto Pair : OIRegion) 
     if (Pair[0] == Addr) return true;
@@ -87,7 +94,6 @@ void Manager::runPipeline() {
   PerfMapFile = new std::ofstream("/tmp/perf-"+std::to_string(getpid())+".map");
 
   IRE = llvm::make_unique<IREmitter>();
-  IRO = llvm::make_unique<IROpt>();
 
   while (isRunning) {
     uint32_t EntryAddress;
@@ -154,12 +160,13 @@ void Manager::runPipeline() {
         for (auto& BB : F)
           Size += BB.size();
 
-      std::cout << "Size: " << Size << std::endl;
+      //if(!ROIMode)
+      //  std::cout << "Size: " << Size << std::endl;
 
-      //if (OptMode != OptPolitic::Custom)
-      //  IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress);
-      //else if (CustomOpts->count(EntryAddress) != 0)
-      //  IRO->customOptimizeIRFunction(Module, (*CustomOpts)[EntryAddress]);
+      if(ROIMode)
+        TheAOS.run(Module, ROI);
+      else
+        TheAOS.run(Module, OIRegion);
 
       if (VerboseOutput)
         Module->print(llvm::errs(), nullptr);
@@ -168,7 +175,8 @@ void Manager::runPipeline() {
         for (auto& BB : F)
           OSize += BB.size();
       
-      std::cout << "OSize: " << OSize << std::endl;
+      //if(!ROIMode)
+      //  std::cout << "OSize: " << OSize << std::endl;
     }
 
     // Remove a region if the first instruction is a return <- can cause infinity loops
@@ -275,7 +283,15 @@ int32_t Manager::jumpToRegion(uint32_t EntryAddress) {
   uint32_t* MemPtr = TheMachine.getMemoryPtr();
 
   while (isNativeRegionEntry(JumpTo)) {
-    JumpTo = ((uint32_t (*)(int32_t*, uint32_t*, uint32_t)) NativeRegions[JumpTo])(RegPtr, MemPtr, EntryAddress);
+
+    if(ROIMode && IRRegionsKey.size() >= ROI.RegionID && IRRegionsKey[ROI.RegionID - 1] == EntryAddress) {
+      uint64_t start = rdtscp();
+      JumpTo = ((uint32_t (*)(int32_t*, uint32_t*, uint32_t)) NativeRegions[JumpTo])(RegPtr, MemPtr, EntryAddress);
+      uint64_t end = rdtscp();
+      RegionTimes.push_back(end - start);
+    } else {
+      JumpTo = ((uint32_t (*)(int32_t*, uint32_t*, uint32_t)) NativeRegions[JumpTo])(RegPtr, MemPtr, EntryAddress);
+    }
   }
 
   return JumpTo;
