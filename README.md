@@ -27,6 +27,8 @@ ARGUMENTS:
   -h : Displays the help message
   -interpret : Only interpret.
   -rft : Region Formation Technique (net)
+  -aos : Path to the adaptative system optimization file
+  -roi : Region of investigation ID:TAs
   -v : Displays the OpenISA instructions from the compiled regions
 ```
 
