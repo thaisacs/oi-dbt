@@ -13,19 +13,12 @@ static inline uint64_t rdtscp() {
 }
 
 uint64_t CodeAnalyzer::getCompilationTime(std::unique_ptr<llvm::Module> M) {
+  auto IRJIT = llvm::make_unique<llvm::orc::IRJIT>(); 
   uint64_t start = rdtscp();
   IRJIT->addModule(std::move(llvm::CloneModule(*M.get())));
   uint64_t end = rdtscp();
 
   return end - start;
-  
-  //AOSTimer Timer;
-  //Timer.startClock();
-  //IRJIT->addModule(std::move(llvm::CloneModule(*M.get())));
-  //Timer.stopClock();
-  
-  
-  //exit(0);
 }
 
 uint64_t CodeAnalyzer::getExecutionTime(std::vector<uint16_t> Genes, unsigned RegionID, 

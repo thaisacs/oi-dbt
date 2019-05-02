@@ -1,5 +1,8 @@
 #include <DNA.hpp>
 
+#include <iostream>
+#include <fstream>
+
 using namespace dbt;
 
 DNA::DNA(unsigned Size, double CW, double EW, uint16_t T, InitialSearchSpaceType Type) {
@@ -54,14 +57,14 @@ void DNA::setFitness(double F) {
 }
 
 void GADNA::print() {
+  std::ofstream myfile;
+  myfile.open("historic.txt", std::ios::app);
   for(unsigned i = 0; i < Genes.size(); i++) {
-    std::cout << Genes[i] << " ";
+    myfile << Genes[i] << " ";
   }
-  std::cout << " - " << " CompilationTime: " << CompilationTime << 
-    " ExecutionTime: " << ExecutionTime << " Fitness " << Fitness << std::endl;
-  std::cout.precision(8);
-  std::cout << std::fixed << Probability << std::endl;
-  
+  myfile << " - " << " CompilationTime: " << CompilationTime << 
+    " ExecutionTime: " << ExecutionTime << " Fitness " << Fitness << " Probability " << Probability << std::endl;
+  myfile.close();
 }
 
 void GADNA::calculateProbability(uint64_t Sum) {

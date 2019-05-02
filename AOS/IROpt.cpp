@@ -35,8 +35,8 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
       case LOOP_REDUCE:
         FPM->add(llvm::createLoopStrengthReducePass());
         break;
-      case LOOP_IDIOM: //##
-        //FPM->add(llvm::createLoopIdiomPass());
+      case LOOP_IDIOM: 
+        FPM->add(llvm::createLoopIdiomPass());
         break;
       case LOOP_DELETION: //**
         FPM->add(llvm::createLoopDeletionPass());
@@ -83,8 +83,8 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
       case DSE:
         FPM->add(llvm::createDeadStoreEliminationPass());
         break;
-      case CALLSITE_SPLITTING: //#
-        //FPM->add(llvm::createCallSiteSplittingPass());
+      case CALLSITE_SPLITTING:
+        FPM->add(llvm::createCallSiteSplittingPass());
         break;
       case ADCE:
         FPM->add(llvm::createAggressiveDCEPass());
@@ -92,8 +92,8 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
       case GUARD_WIDENING:
         FPM->add(llvm::createGuardWideningPass());
         break;
-      case BDCE: //#
-        //FPM->add(llvm::createBitTrackingDCEPass());
+      case BDCE:
+        FPM->add(llvm::createBitTrackingDCEPass());
         break;
       case SROA:
         FPM->add(llvm::createSROAPass());
@@ -171,7 +171,7 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
         FPM->add(llvm::createPartiallyInlineLibCallsPass());
         break;
       case SCALARIZER:
-        FPM->add(llvm::createScalarizerPass());
+        //FPM->add(llvm::createScalarizerPass());
         break;
       case SEPARATE_CONST_OFFSET_FROM_GEP:
         FPM->add(llvm::createSeparateConstOffsetFromGEPPass());
@@ -204,7 +204,7 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
         FPM->add(llvm::createInstSimplifyLegacyPass());
         break;
       case AGGRESSIVE_INSTCOMBINE:
-        //FPM->add(llvm::createAggressiveInstCombinerPass());
+        FPM->add(llvm::createAggressiveInstCombinerPass());
         break;
       case LOWERINVOKE:
         FPM->add(llvm::createLowerInvokePass());
@@ -240,7 +240,7 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
         FPM->add(llvm::createLazyValueInfoPass());
         break;
       case DA:
-      //  FPM->add(llvm::createDependenceAnalysisWrapperPass());
+        FPM->add(llvm::createDependenceAnalysisWrapperPass());
         break;
       case COST_MODEL:
         FPM->add(llvm::createCostModelAnalysisPass());
@@ -249,7 +249,7 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
         FPM->add(llvm::createDelinearizationPass());
         break;
       case DIVERGENCE:
-      //  FPM->add(llvm::createDivergenceAnalysisPass());
+        FPM->add(llvm::createDivergenceAnalysisPass());
         break;
       case INSTCOUNT:
         FPM->add(llvm::createInstCountPass());
@@ -312,7 +312,7 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
         MPM->add(llvm::createLoopExtractorPass());
         break;
       case LOOP_EXTRACT_SINGLE: //#
-        //MPM->add(llvm::createSingleLoopExtractorPass());
+        MPM->add(llvm::createSingleLoopExtractorPass());
         break;
       case EXTRACT_BLOCKS:
         MPM->add(llvm::createBlockExtractorPass());

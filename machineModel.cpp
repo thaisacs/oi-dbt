@@ -2,7 +2,7 @@
 
 double dbt::MachineModel::runOnMachine(std::vector<uint16_t> Genes, unsigned RegionID, 
     const std::string &AOSPath, const std::string &BinPath, const std::string &BinArgs) {
-  
+ 
   int LoadStatus = TheMachine->loadELF(BinPath);
 
   if (!LoadStatus) {
@@ -37,20 +37,17 @@ double dbt::MachineModel::runOnMachine(std::vector<uint16_t> Genes, unsigned Reg
 
   SyscallM = std::make_unique<dbt::LinuxSyscallManager>(true);
 
+  TheMachine->setCommandLineArguments(BinArgs);
   GlobalTimer.startClock();
   dbt::ITDInterpreter I(*SyscallM.get(), *RftDefault.get());
-  //std::cerr << "Starting execution:\n";
   
   I.executeAll((*TheMachine.get()));
 
   GlobalTimer.stopClock();
   //TheManager.dumpStats();
-  //GlobalTimer.printReport("Global");
 
   std::cerr.flush();
   std::cout.flush();
-
-  //SyscallM->getExitStatus();
-
+  
   return TheManager.getRegionTime();
 }

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <manager.hpp>
 
+#include <fstream>
+
 using namespace dbt;
 
 Population::Population(const AOSParams::GASolverParams &Params, llvm::Module* M, 
@@ -110,6 +112,10 @@ std::vector<std::unique_ptr<GADNA>> Population::crossover(double MutationRate) {
 }
 
 void Population::print() {
+  std::ofstream myfile;
+  myfile.open("historic.txt", std::ios::app);
+  myfile << "Population\n";
+  myfile.close();
   for(unsigned i = 0; i < Chromosomes.size(); i++) {
     Chromosomes[i]->print();
   }
@@ -144,6 +150,7 @@ void GASolver::Evaluate(unsigned RegionID) {
     Historic.push_back(std::move(Buffer));
     CurrentPopulation->calculateFitness(Region, RegionID, BinPath, BinArgs, AOSPath);
     CurrentPopulation->calculateProbability();
+    CurrentPopulation->print();
     Generation++; 
   }
   
