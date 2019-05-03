@@ -45,12 +45,11 @@ namespace dbt {
         uint16_t Times, InitialSearchSpaceType Type) : 
       DNA(Size, CompilationWeight, ExecutionWeight, Times, Type), Probability(0) {}
 
-    void calculateProbability(uint64_t);
     double getProbability();
     void setProbability(double);
     GADNA* crossover(GADNA*);
     void mutate(double);
     GADNA* clone();
-    void print();
+    void print(const std::string&, const std::string&, const std::string&);
   };
 }

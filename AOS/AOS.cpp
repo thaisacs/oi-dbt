@@ -83,6 +83,21 @@ void AOS::iterativeCompilation(llvm::Module *M, OIInstList OIRegion) {
 std::unique_ptr<RegionData> AOS::makeDatabaseData(std::vector<std::vector<std::unique_ptr<GADNA>>> ICData, 
     const std::string& llvmDNA, const std::string& oiDNA) {
 
+  std::ofstream myHistoric;
+  std::string HistName = Params.Database + BinName + std::to_string(NOR) + "H.txt";
+  myHistoric.open(HistName, std::ios::app);
+  myHistoric.close();
+  
+  for(unsigned i = 0; i < ICData.size(); i++) {
+    std::ofstream myHistoric;
+    myHistoric.open(HistName, std::ios::app);
+    myHistoric << "Generation #" << std::to_string(i) << std::endl;
+    myHistoric.close();
+    for(unsigned j = 0; j < ICData[i].size(); j++) {
+      ICData[i][j]->print(Params.Database, BinName, std::to_string(NOR));
+    } 
+  }
+  
   auto RD = std::make_unique<RegionData>();
   RD->llvmDNA = llvmDNA;
   RD->oiDNA = oiDNA;

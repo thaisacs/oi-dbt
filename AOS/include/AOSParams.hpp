@@ -15,6 +15,8 @@ namespace dbt {
       unsigned Max, Min, Times;
 
       unsigned Generations;
+      double diversityThreshold;
+      unsigned convergenceThreshold;
       double MutationRate;
       double CompileWeight;
       double ExecutionWeight;

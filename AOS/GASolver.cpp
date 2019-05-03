@@ -9,9 +9,11 @@ using namespace dbt;
 
 Population::Population(const AOSParams::GASolverParams &Params, llvm::Module* M, 
     unsigned RegionID, const std::string &BinPath, const std::string &BinArgs,
-    const std::string &AOSPath) {
+    const std::string &AOSPath) : convergenceCount(0) {
   
   std::vector<std::unique_ptr<GADNA>> Buffer(Params.PopulationSize);
+
+  Best = nullptr;
 
   for(unsigned i = 0; i < BEST10_SET.size(); i++) {
 
@@ -45,27 +47,26 @@ void Population::calculateFitness(llvm::Module* M, unsigned RegionID,
 
 }
 
-void Population::calculateProbability() {
-  uint64_t Sum = 0, Max = Chromosomes[0]->getFitness();
-
-  for(unsigned i = 1; i < Chromosomes.size(); i++)
-    if(Chromosomes[i]->getFitness() > Max)
-      Max = Chromosomes[i]->getFitness();
-
-  for(unsigned i = 0; i < Chromosomes.size(); i++)
-    Chromosomes[i]->calculateProbability(Max);
-
-  normalize();
-}
+//void Population::calculateProbability() {
+//  uint64_t Sum = 0, Max = Chromosomes[0]->getFitness();
+//
+//  for(unsigned i = 1; i < Chromosomes.size(); i++)
+//    if(Chromosomes[i]->getFitness() > Max)
+//      Max = Chromosomes[i]->getFitness();
+//
+//  for(unsigned i = 0; i < Chromosomes.size(); i++)
+//    Chromosomes[i]->calculateProbability(Max);
+//
+//}
 
 void Population::normalize() {
   uint64_t Sum = 0;
 
   for(unsigned i = 0; i < Chromosomes.size(); i++)
-    Sum += Chromosomes[i]->getProbability();
+    Sum += Chromosomes[i]->getFitness();
 
   for(unsigned i = 0; i < Chromosomes.size(); i++)
-    Chromosomes[i]->setProbability(Chromosomes[i]->getProbability()/Sum);
+    Chromosomes[i]->setProbability(((double)Chromosomes[i]->getFitness())/Sum);
 }
 
 unsigned Population::pickOne() {
@@ -112,12 +113,8 @@ std::vector<std::unique_ptr<GADNA>> Population::crossover(double MutationRate) {
 }
 
 void Population::print() {
-  std::ofstream myfile;
-  myfile.open("historic.txt", std::ios::app);
-  myfile << "Population\n";
-  myfile.close();
   for(unsigned i = 0; i < Chromosomes.size(); i++) {
-    Chromosomes[i]->print();
+    //Chromosomes[i]->print();
   }
 }
 
@@ -125,10 +122,10 @@ std::vector<std::vector<std::unique_ptr<GADNA>>> GASolver::Solve(llvm::Module* M
   Region = M;
   
   CurrentPopulation = nullptr;
-
   CurrentPopulation = std::make_unique<Population>(Params, 
       M, RegionID, BinPath, BinArgs, AOSPath);
-  CurrentPopulation->calculateProbability();
+  CurrentPopulation->normalize();
+  CurrentPopulation->setBest();
   
   Evaluate(RegionID);
 
@@ -149,10 +146,53 @@ void GASolver::Evaluate(unsigned RegionID) {
     auto Buffer = CurrentPopulation->crossover(Params.MutationRate);
     Historic.push_back(std::move(Buffer));
     CurrentPopulation->calculateFitness(Region, RegionID, BinPath, BinArgs, AOSPath);
-    CurrentPopulation->calculateProbability();
-    CurrentPopulation->print();
+    CurrentPopulation->normalize();
+    CurrentPopulation->setBest();
     Generation++; 
+  
+    if(CurrentPopulation->getConvergenceCount() >= Params.convergenceThreshold)
+      break;
+    
+    if(CurrentPopulation->calculateDiversity() <= Params.diversityThreshold)
+      break;
   }
   
   Historic.push_back(std::move(CurrentPopulation->getChromosomes()));
+}
+
+void Population::setBest() {
+  unsigned Index = 0;
+
+  for(unsigned i = 1; i < Chromosomes.size(); i++) {
+    if(Chromosomes[Index]->getFitness() > Chromosomes[i]->getFitness()) {
+      Index = i;
+    }
+  }
+
+  if(!Best) {
+    Best = std::unique_ptr<GADNA>(Chromosomes[Index]->clone());
+  }else {
+    if(Best->getFitness() > Chromosomes[Index]->getFitness()) {
+      Best = std::unique_ptr<GADNA>(Chromosomes[Index]->clone());
+      convergenceCount = 0;
+      std::cout.precision(4);
+      std::cout << std::fixed << Best->getFitness() << std::endl;
+    }else {
+      ++convergenceCount;
+    }
+  }
+}
+    
+double Population::calculateDiversity() {
+  double min = Chromosomes[0]->getProbability(); 
+  double max = Chromosomes[0]->getProbability();
+
+  for(unsigned i = 1; i < Chromosomes.size(); i++) {
+    if(min > Chromosomes[i]->getProbability())
+      min = Chromosomes[i]->getProbability();
+    if(max < Chromosomes[i]->getProbability())
+      max = Chromosomes[i]->getProbability();
+  }
+  
+  return max - min;
 }

@@ -17,6 +17,8 @@ namespace dbt {
 
   class Population {
     std::vector<std::unique_ptr<GADNA>> Chromosomes;
+    std::unique_ptr<GADNA> Best;
+    unsigned convergenceCount;
   public:
     Population(const AOSParams::GASolverParams&, llvm::Module*, unsigned, 
         const std::string&, const std::string&, const std::string&);
@@ -25,9 +27,11 @@ namespace dbt {
     void calculateFitness(llvm::Module*, unsigned, const std::string&, 
         const std::string&, const std::string&);
     void normalize();
-    void calculateProbability();
     unsigned pickOne();
-    
+    void setBest();
+    unsigned getConvergenceCount() { return convergenceCount; }
+    double calculateDiversity();
+
     std::vector<std::unique_ptr<GADNA>> getChromosomes() {
       return std::move(Chromosomes);
     }

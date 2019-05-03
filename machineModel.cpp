@@ -48,6 +48,6 @@ double dbt::MachineModel::runOnMachine(std::vector<uint16_t> Genes, unsigned Reg
 
   std::cerr.flush();
   std::cout.flush();
-  
+
   return TheManager.getRegionTime();
 }

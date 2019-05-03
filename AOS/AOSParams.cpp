@@ -41,6 +41,8 @@ void MappingTraits<AOSParams::GASolverParams>::mapping(IO &io,
   io.mapRequired("generations", Params.Generations);
   io.mapRequired("compileWeight", Params.CompileWeight);
   io.mapRequired("executionWeight", Params.ExecutionWeight);
+  io.mapRequired("diversityThreshold", Params.diversityThreshold);
+  io.mapRequired("convergenceThreshold", Params.convergenceThreshold);
 }
 
 void MappingTraits<AOSParams::RMHCSolverParams>::mapping(IO &io, 

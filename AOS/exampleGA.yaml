@@ -8,11 +8,13 @@ database: test/
 
 icStrategy: GA 
 icStrategyParams:
-  populationSize: 26 
-  generations: 50
+  populationSize: 50 
+  generations: 100
   mutationRate: 0.018
   compileWeight: 0.1
   executionWeight: 0.9
+  diversityThreshold: 0.01
+  convergenceThreshold: 10
   times: 1
   max: 25
   min: 5
