@@ -134,8 +134,9 @@ std::unordered_map<uint32_t, std::vector<std::string>>* loadCustomOpts(std::stri
 }
 
 int main(int argc, char** argv) {
-  srand(time(NULL));
-  
+  //srand(time(NULL));
+  srand(static_cast<unsigned int>(clock()));
+
   signal(SIGSEGV, sigHandler);
   signal(SIGABRT, sigHandler);
 

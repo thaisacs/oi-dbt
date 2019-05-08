@@ -509,159 +509,159 @@ std::string DNAEncoding::encode(OIInstList OIRegion) {
         DNA.push_back('z');
         break;
       case OIInstType::Mfhc1:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('a');
         break;
       case OIInstType::Divd:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('b');
         break;
       case OIInstType::Subd:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('c');
         break;
       case OIInstType::Negs:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('d');
         break;
       case OIInstType::Ext:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('e');
         break;
       case OIInstType::Madds:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('f');
         break;
       case OIInstType::Shrr:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('g');
         break;
       case OIInstType::Movf:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('h');
         break;
       case OIInstType::Movt:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('i');
         break;
       case OIInstType::Ldxc1:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('j');
         break;
       case OIInstType::Msubs:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('k');
         break;
       case OIInstType::Coled:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('l');
         break;
       case OIInstType::Culed:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('m');
         break;
       case OIInstType::Msubd:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('n');
         break;
       case OIInstType::Movzd:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('o');
         break;
       case OIInstType::Movfd:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('p');
         break;
       case OIInstType::Asrr:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('q');
         break;
       case OIInstType::Absd:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('r');
         break;
       case OIInstType::Abss:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('s');
         break;
       case OIInstType::Cund:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('t');
         break;
       case OIInstType::Movnd:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('u');
         break;
       case OIInstType::Ror:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('v');
         break;
       case OIInstType::Movzs:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('w');
         break;
       case OIInstType::Movfs:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('x');
         break;
       case OIInstType::Colts:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('y');
         break;
       case OIInstType::Movns:
-        DNA.push_back('c');
+        DNA.push_back('d');
         DNA.push_back('z');
         break;
       case OIInstType::Coles:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('a');
         break;
       case OIInstType::Sqrtd:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('b');
         break;
       case OIInstType::Sqrts:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('c');
         break;
       case OIInstType::Cults:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('d');
         break;
       case OIInstType::Cules:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('e');
         break;
       case OIInstType::Cultd:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('f');
         break;
       case OIInstType::Movtd:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('g');
         break;
       case OIInstType::Movts:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('h');
         break;
       case OIInstType::Cuns:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('i');
         break;
       case OIInstType::Cueqs:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('j');
         break;
       case OIInstType::Cueqd:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('k');
         break;
       case OIInstType::Null:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('l');
         break;
       default:
-        DNA.push_back('d');
+        DNA.push_back('e');
         DNA.push_back('m');
         break;
     }

@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <manager.hpp>
-
 #include <fstream>
 
 using namespace dbt;
@@ -16,17 +15,16 @@ Population::Population(const AOSParams::GASolverParams &Params, llvm::Module* M,
   Best = nullptr;
 
   for(unsigned i = 0; i < BEST10_SET.size(); i++) {
-
-    Buffer[i] = std::make_unique<GADNA>(Params.Max, 
+    Buffer[i] = std::make_unique<GADNA>(Params.Max, Params.Min, 
         Params.CompileWeight, Params.ExecutionWeight, Params.Times, InitialSearchSpaceType::BEST10);
-
   }
 
   for(unsigned i = BEST10_SET.size(); i < Params.PopulationSize; i++) {
-
-    Buffer[i] = std::make_unique<GADNA>(Params.Max, 
+    Buffer[i] = std::make_unique<GADNA>(Params.Max, Params.Min,
         Params.CompileWeight, Params.ExecutionWeight, Params.Times, InitialSearchSpaceType::RANDOM);
-
+    //Buffer[i] = std::make_unique<GADNA>(Params.Max, 
+    //    Params.CompileWeight, Params.ExecutionWeight, Params.Times, InitialSearchSpaceType::BEST10);
+    //Buffer[i]->mutate(0.25);
   }
   
   for(unsigned i = 0; i < Buffer.size(); i++) {
@@ -47,32 +45,33 @@ void Population::calculateFitness(llvm::Module* M, unsigned RegionID,
 
 }
 
-//void Population::calculateProbability() {
-//  uint64_t Sum = 0, Max = Chromosomes[0]->getFitness();
-//
-//  for(unsigned i = 1; i < Chromosomes.size(); i++)
-//    if(Chromosomes[i]->getFitness() > Max)
-//      Max = Chromosomes[i]->getFitness();
-//
-//  for(unsigned i = 0; i < Chromosomes.size(); i++)
-//    Chromosomes[i]->calculateProbability(Max);
-//
-//}
+void Population::calculateProbability() {
+  uint64_t Sum = 0, Max = Chromosomes[0]->getFitness();
+
+  for(unsigned i = 1; i < Chromosomes.size(); i++)
+    if(Chromosomes[i]->getFitness() > Max)
+       Max = Chromosomes[i]->getFitness();
+
+  for(unsigned i = 0; i < Chromosomes.size(); i++)
+    Chromosomes[i]->calculateProbability(Max);
+  
+  normalize();
+}
 
 void Population::normalize() {
   uint64_t Sum = 0;
 
   for(unsigned i = 0; i < Chromosomes.size(); i++)
-    Sum += Chromosomes[i]->getFitness();
+    Sum += Chromosomes[i]->getProbability();
 
   for(unsigned i = 0; i < Chromosomes.size(); i++)
-    Chromosomes[i]->setProbability(((double)Chromosomes[i]->getFitness())/Sum);
+    Chromosomes[i]->setProbability(((double)Chromosomes[i]->getProbability())/Sum);
 }
 
 unsigned Population::pickOne() {
   double Rate = getRandomRate();
   unsigned Index = 0;
-
+  
   while(Rate > 0 && Index < Chromosomes.size()) {
     Rate -= Chromosomes[Index]->getProbability();
     Index++;
@@ -85,46 +84,57 @@ unsigned Population::pickOne() {
 }
 
 std::vector<std::unique_ptr<GADNA>> Population::crossover(double MutationRate) {
-  std::vector<std::unique_ptr<GADNA>> OldChromosomes; 
-
+  std::vector<std::unique_ptr<GADNA>> NewChromosomes; 
   std::unique_ptr<GADNA> ChildOne, ChildTwo;
-
   unsigned ParentOne, ParentTwo;
 
-  OldChromosomes = std::move(Chromosomes);
-
-  while(Chromosomes.size() < OldChromosomes.size()) {
+  auto Buffer = std::move(std::unique_ptr<GADNA>(Best->clone()));
+  Buffer->mutate(MutationRate);
+  NewChromosomes.push_back(std::move(Buffer));
+  
+  while(NewChromosomes.size() < Chromosomes.size()) {
     ParentOne = pickOne();
     ParentTwo = pickOne();
 
     ChildOne = std::unique_ptr<GADNA>
-      (OldChromosomes[ParentOne]->crossover(OldChromosomes[ParentTwo].get()));
+      (Chromosomes[ParentOne]->crossover(Chromosomes[ParentTwo].get()));
     ChildTwo = std::unique_ptr<GADNA>
-      (OldChromosomes[ParentTwo]->crossover(OldChromosomes[ParentOne].get()));
+      (Chromosomes[ParentTwo]->crossover(Chromosomes[ParentOne].get()));
 
     ChildOne->mutate(MutationRate);
     ChildTwo->mutate(MutationRate);
+    
+    if(NewChromosomes.size() < Chromosomes.size()) {
+      NewChromosomes.push_back(std::move(ChildOne));
+    }
 
-    Chromosomes.push_back(std::move(ChildOne));
-    Chromosomes.push_back(std::move(ChildTwo));
+    if(NewChromosomes.size() < Chromosomes.size()) {
+      NewChromosomes.push_back(std::move(ChildTwo));
+    }
   }
+  
+  auto OldChromosomes = std::move(Chromosomes);
+  Chromosomes = std::move(NewChromosomes);
 
   return std::move(OldChromosomes); 
 }
 
 void Population::print() {
+  std::cout << "BEST: ";
+  Best->print("", "", "");
+  std::cout << std::endl;
   for(unsigned i = 0; i < Chromosomes.size(); i++) {
-    //Chromosomes[i]->print();
+    Chromosomes[i]->print("", "", "");
   }
 }
 
 std::vector<std::vector<std::unique_ptr<GADNA>>> GASolver::Solve(llvm::Module* M, unsigned RegionID) {
   Region = M;
   
-  CurrentPopulation = nullptr;
   CurrentPopulation = std::make_unique<Population>(Params, 
       M, RegionID, BinPath, BinArgs, AOSPath);
-  CurrentPopulation->normalize();
+  CurrentPopulation->calculateProbability();
+  
   CurrentPopulation->setBest();
   
   Evaluate(RegionID);
@@ -141,23 +151,36 @@ void GASolver::Solve(llvm::Module *M, ROIInfo R, unsigned RegionID) {
 
 void GASolver::Evaluate(unsigned RegionID) {
   unsigned Generation = 1;
+    
+  CurrentPopulation->print();
   
   while(Generation < Params.Generations) {
     auto Buffer = CurrentPopulation->crossover(Params.MutationRate);
-    Historic.push_back(std::move(Buffer));
     CurrentPopulation->calculateFitness(Region, RegionID, BinPath, BinArgs, AOSPath);
-    CurrentPopulation->normalize();
+    CurrentPopulation->calculateProbability();
     CurrentPopulation->setBest();
-    Generation++; 
-  
+    CurrentPopulation->print();
+
+    Historic.push_back(std::move(Buffer));
+    
     if(CurrentPopulation->getConvergenceCount() >= Params.convergenceThreshold)
-      break;
+      std::cout << "convergence problem...\n";
+      //break;
     
     if(CurrentPopulation->calculateDiversity() <= Params.diversityThreshold)
-      break;
+      CurrentPopulation->shake();
+    
+    Generation++; 
   }
   
   Historic.push_back(std::move(CurrentPopulation->getChromosomes()));
+}
+
+void Population::shake() {
+  std::cout << "shake...\n";
+  for(unsigned i = 1; i < Chromosomes.size(); i++) {
+    Chromosomes[i]->mutate(0.016);
+  }
 }
 
 void Population::setBest() {
@@ -176,7 +199,7 @@ void Population::setBest() {
       Best = std::unique_ptr<GADNA>(Chromosomes[Index]->clone());
       convergenceCount = 0;
       std::cout.precision(4);
-      std::cout << std::fixed << Best->getFitness() << std::endl;
+      std::cout << "FITNESSSSSS " <<std::fixed << Best->getFitness() << std::endl;
     }else {
       ++convergenceCount;
     }

@@ -2,10 +2,12 @@
 
 using namespace dbt;
 
-std::vector<uint16_t> SearchSpace::generateRandomSpace(unsigned Size) {
+std::vector<uint16_t> SearchSpace::generateRandomSpace(unsigned Size, unsigned Min) {
   std::vector<uint16_t> Genes(Size);
+  
+  unsigned RN = getRandomNumber(Min, Size);
 
-  for(unsigned i = 0; i < Size; i++) {
+  for(unsigned i = 0; i < RN; i++) {
     Genes[i] = getRandomNumber(MIN_OPT, MAX_OPT + 1);
   }
 
@@ -29,6 +31,15 @@ std::vector<uint16_t> SearchSpace::generateBest10Space(unsigned Size) {
   ++Index;
 
   Index = Index % BEST10_SET.size();
+
+  return std::move(Genes);
+}
+    
+std::vector<uint16_t> SearchSpace::generateZeroSpace(unsigned Size) {
+  std::vector<uint16_t> Genes(Size);
+  
+  for(unsigned i = 0; i < Genes.size(); i++)
+    Genes[i] = 0;
 
   return std::move(Genes);
 }

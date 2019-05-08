@@ -1,11 +1,9 @@
 #pragma once
 
 #include <iostream>
-#include <vector>
-#include <string>
-#include <array>
-#include <memory>
+#include <cstdlib>
+#include <ctime>
 
-int getRandomNumber(int Min, int Max);
+unsigned getRandomNumber(unsigned Min, unsigned Max);
 
 double getRandomRate(); 

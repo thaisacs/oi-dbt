@@ -30,7 +30,9 @@ namespace dbt {
     unsigned pickOne();
     void setBest();
     unsigned getConvergenceCount() { return convergenceCount; }
+    void calculateProbability(); 
     double calculateDiversity();
+    void shake();
 
     std::vector<std::unique_ptr<GADNA>> getChromosomes() {
       return std::move(Chromosomes);

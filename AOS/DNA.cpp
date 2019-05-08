@@ -5,7 +5,7 @@
 
 using namespace dbt;
 
-DNA::DNA(unsigned Size, double CW, double EW, uint16_t T, InitialSearchSpaceType Type) {
+DNA::DNA(unsigned Size, unsigned Min, double CW, double EW, uint16_t T, InitialSearchSpaceType Type) {
 
   CompilationWeight = CW;
   ExecutionWeight = EW;
@@ -14,9 +14,11 @@ DNA::DNA(unsigned Size, double CW, double EW, uint16_t T, InitialSearchSpaceType
   CA = llvm::make_unique<CodeAnalyzer>(T);
 
   if(Type == InitialSearchSpaceType::RANDOM) {
-    Genes = std::move(SearchSpace::generateRandomSpace(Size));
+    Genes = std::move(SearchSpace::generateRandomSpace(Size, Min));
   }else if(Type == InitialSearchSpaceType::BEST10) {
     Genes = std::move(SearchSpace::generateBest10Space(Size));
+  }else if(Type == InitialSearchSpaceType::ZERO) {
+    Genes = std::move(SearchSpace::generateZeroSpace(Size));
   }
 }
 
@@ -57,20 +59,22 @@ void DNA::setFitness(double F) {
 }
 
 void GADNA::print(const std::string& Database, const std::string& BinName, const std::string& NOR) {
-  std::ofstream myHistoric;
-  std::string HistName = Database + BinName + NOR + "H.txt";
-  myHistoric.open(HistName, std::ios::app);
   for(unsigned i = 0; i < Genes.size(); i++) {
-    myHistoric << Genes[i] << " ";
+    std::cout << Genes[i] << " ";
   }
-  myHistoric << " - " << " CompilationTime: " << CompilationTime << 
-    " ExecutionTime: " << ExecutionTime << " Fitness " << Fitness << " Probability " << Probability << std::endl;
-  myHistoric.close();
+  std::cout.precision(4);
+  std::cout << "- " << std::fixed << Probability << std::endl;
+  std::cout << " " << Fitness << " " << " " << CompilationTime << " " << ExecutionTime << std::endl;
+  //std::ofstream myHistoric;
+  //std::string HistName = Database + BinName + NOR + "H.txt";
+  //myHistoric.open(HistName, std::ios::app);
+  //for(unsigned i = 0; i < Genes.size(); i++) {
+  //  myHistoric << Genes[i] << " ";
+  //}
+  //myHistoric << " - " << " CompilationTime: " << CompilationTime << 
+  //  " ExecutionTime: " << ExecutionTime << " Fitness " << Fitness << " Probability " << Probability << std::endl;
+  //myHistoric.close();
 }
-
-//void GADNA::calculateProbability(uint64_t Sum) {
-//  Probability = Sum - Fitness;
-//}
 
 double GADNA::getProbability() {
   return Probability;
@@ -125,4 +129,8 @@ void GADNA::mutate(double MutationRate) {
     if(Random <= MutationRate)
       Genes[i] = getRandomNumber(MIN_OPT, MAX_OPT+1);
   }
+}
+
+void GADNA::calculateProbability(uint64_t Sum) {
+  Probability = Sum - Fitness;
 }

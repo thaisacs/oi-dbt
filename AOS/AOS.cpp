@@ -76,6 +76,7 @@ void AOS::iterativeCompilation(llvm::Module *M, OIInstList OIRegion) {
   std::string oiDNA = CTZ->encode(OIRegion);
   
   auto ICData = ICSolver->Solve(M, NOR);
+  exit(0);
   auto DBData = makeDatabaseData(std::move(ICData), llvmDNA, oiDNA);
   generateDatabase(std::move(DBData));  
 }

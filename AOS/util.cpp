@@ -1,10 +1,13 @@
 #include <util.hpp>
 
-int getRandomNumber(int Min, int Max) { 
-  return (rand() % Max) + Min; 
+unsigned getRandomNumber(unsigned Min, unsigned Max) { 
+  unsigned i = (rand() % Max) + Min; 
+  if(i >= Max)
+    return Max - 1;
+  else
+    return i;
 }  
 
 double getRandomRate() { 
-  double R = getRandomNumber(0, 10);
-  return R /= 10;
+  return double(rand()) / (double(RAND_MAX) + 1.0);
 }

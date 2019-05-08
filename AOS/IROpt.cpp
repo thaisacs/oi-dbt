@@ -9,6 +9,7 @@ constexpr unsigned int str2int(const char* str, int h = 0) {
 void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::FunctionPassManager* FPM, 
     std::vector<uint16_t> Passes) {
   for (int PassIndex = 0; PassIndex < Passes.size(); PassIndex++) {
+    //std::cout << Passes[PassIndex] << std::endl;
     switch (Passes[PassIndex]) { 
       case BASICAA:
         FPM->add(llvm::createBasicAAWrapperPass());
@@ -304,7 +305,7 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
       case LOOP_EXTRACT:
         MPM->add(llvm::createLoopExtractorPass());
         break;
-      case LOOP_EXTRACT_SINGLE: //#
+      case LOOP_EXTRACT_SINGLE:
         MPM->add(llvm::createSingleLoopExtractorPass());
         break;
       case EXTRACT_BLOCKS:
@@ -331,34 +332,34 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
       case NONE:
         break;
       case METARENAMER:
-        //MPM->add(llvm::createMetaRenamerPass());
+        MPM->add(llvm::createMetaRenamerPass());
         break;
       case PA_EVAL:
         FPM->add(llvm::createPAEvalPass());
         break;
       case INTERNALIZE:
-        //MPM->add(llvm::createInternalizePass());
+        // MPM->add(llvm::createInternalizePass());
         break;
       case INFER_ADDRESS_SPACES:
-        //FPM->add(llvm::createInferAddressSpacesPass());
+        FPM->add(llvm::createInferAddressSpacesPass());
         break;
       case SPECULATIVE_EXECUTION:
-        //FPM->add(llvm::createSpeculativeExecutionPass());
+        FPM->add(llvm::createSpeculativeExecutionPass());
         break;
       case CODEGENPREPARE:
-        //FPM->add(llvm::createCodeGenPreparePass());
+        FPM->add(llvm::createCodeGenPreparePass());
         break;
       case LOOP_GUARD_WIDENING:
-        //FPM->add(llvm::createLoopGuardWideningPass());
+        FPM->add(llvm::createLoopGuardWideningPass());
         break;
       case DIV_REM_PAIRS:
-        //FPM->add(llvm::createDivRemPairsPass());
+        FPM->add(llvm::createDivRemPairsPass());
         break;
       case LOOP_INTERCHANGE:
-        //FPM->add(llvm::createLoopInterchangePass());
+        FPM->add(llvm::createLoopInterchangePass());
         break;
       case SROA:
-        //FPM->add(llvm::createSROAPass());
+        FPM->add(llvm::createSROAPass());
         break;
       default:
         std::cerr << "Trying to use an invalid optimization pass!\n";

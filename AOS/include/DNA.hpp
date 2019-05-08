@@ -20,7 +20,7 @@ namespace dbt {
   public:
     DNA(double, double, uint16_t, std::vector<uint16_t>);
     
-    DNA(unsigned, double, double, uint16_t, InitialSearchSpaceType);
+    DNA(unsigned, unsigned, double, double, uint16_t, InitialSearchSpaceType);
 
     void calculateFitness(std::unique_ptr<llvm::Module>, unsigned, const std::string&,
         const std::string&, const std::string&);
@@ -41,15 +41,16 @@ namespace dbt {
     GADNA(double CW, double EW, uint16_t T, std::vector<uint16_t> Genes) : 
       DNA(CW, EW, T, std::move(Genes)) {} 
     
-    GADNA(unsigned Size, double CompilationWeight, double ExecutionWeight, 
+    GADNA(unsigned Size, unsigned Min, double CompilationWeight, double ExecutionWeight, 
         uint16_t Times, InitialSearchSpaceType Type) : 
-      DNA(Size, CompilationWeight, ExecutionWeight, Times, Type), Probability(0) {}
+      DNA(Size, Min, CompilationWeight, ExecutionWeight, Times, Type), Probability(0) {}
 
     double getProbability();
     void setProbability(double);
     GADNA* crossover(GADNA*);
     void mutate(double);
     GADNA* clone();
+    void calculateProbability(uint64_t); 
     void print(const std::string&, const std::string&, const std::string&);
   };
 }

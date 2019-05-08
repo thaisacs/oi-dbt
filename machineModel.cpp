@@ -2,7 +2,7 @@
 
 double dbt::MachineModel::runOnMachine(std::vector<uint16_t> Genes, unsigned RegionID, 
     const std::string &AOSPath, const std::string &BinPath, const std::string &BinArgs) {
- 
+
   int LoadStatus = TheMachine->loadELF(BinPath);
 
   if (!LoadStatus) {
