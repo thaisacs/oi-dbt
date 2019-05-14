@@ -6,6 +6,7 @@
 #include <AOSParams.hpp>
 #include <AOSICSolver.hpp>
 #include <AOSMLSolver.hpp>
+#include <CBRSolver.hpp>
 #include <GASolver.hpp>
 #include <characterization.hpp>
 #include <database.hpp>
@@ -36,7 +37,7 @@ namespace dbt {
     std::string BinName;
     unsigned NOR; //Number Of Regions
     public:
-    AOS(const std::string&, const std::string&, const std::string&); 
+    AOS(bool ROIMode, const std::string&, const std::string&, const std::string&); 
 
     void run(llvm::Module*, OIInstList);
     void run(llvm::Module*, ROIInfo); 
@@ -45,7 +46,6 @@ namespace dbt {
         const std::string&, const std::string&);
 
     void generateDatabase(std::unique_ptr<RegionData>);
-    void loadDatabase();
 
     bool isTraining() {
       return Params.Training;
@@ -53,6 +53,6 @@ namespace dbt {
     private:
     void setBinName(const std::string&);
     void iterativeCompilation(llvm::Module*, OIInstList);
-    void machineLearning(llvm::Module*);
+    void machineLearning(llvm::Module*, OIInstList);
   };
 }

@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
     return 2;
   }
 
-  dbt::AOS A(AOSFlag.get_value(), BinaryFlag.get_value(), ArgumentsFlag.get_value());
+  dbt::AOS A(ROIFlag.was_set(), AOSFlag.get_value(), BinaryFlag.get_value(), ArgumentsFlag.get_value());
   dbt::Manager TheManager(M.getDataMemOffset(), M, A, VerboseFlag.was_set(), InlineFlag.was_set());
 
   if(A.isTraining())

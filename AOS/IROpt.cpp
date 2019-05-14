@@ -9,7 +9,6 @@ constexpr unsigned int str2int(const char* str, int h = 0) {
 void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::FunctionPassManager* FPM, 
     std::vector<uint16_t> Passes) {
   for (int PassIndex = 0; PassIndex < Passes.size(); PassIndex++) {
-    //std::cout << Passes[PassIndex] << std::endl;
     switch (Passes[PassIndex]) { 
       case BASICAA:
         FPM->add(llvm::createBasicAAWrapperPass());
@@ -338,7 +337,7 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
         FPM->add(llvm::createPAEvalPass());
         break;
       case INTERNALIZE:
-        // MPM->add(llvm::createInternalizePass());
+        //MPM->add(llvm::createInternalizePass());
         break;
       case INFER_ADDRESS_SPACES:
         FPM->add(llvm::createInferAddressSpacesPass());
@@ -369,17 +368,22 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
   }
 }
 
-void IROpt::optimizeIRFunction(llvm::Module *M, std::vector<uint16_t> Opts) {
+bool IROpt::optimizeIRFunction(llvm::Module *M, std::vector<uint16_t> Opts) {
   auto FPM = std::make_unique<llvm::legacy::FunctionPassManager>(M);
   auto MPM = std::make_unique<llvm::legacy::PassManager>();
 
   populatePassManager(MPM.get(), FPM.get(), Opts);
 
-  FPM->doInitialization();
+  try {
+    FPM->doInitialization();
 
-  for (auto &F : *M) {
-    FPM->run(F);
+    for (auto &F : *M) {
+      FPM->run(F);
+    }
+
+    MPM->run(*M);
+    return true;
+  }catch(int erro) {
+    return false;
   }
-
-  MPM->run(*M);
 }

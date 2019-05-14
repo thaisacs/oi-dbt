@@ -9,8 +9,7 @@ struct less_than_fitness {
   }
 };
 
-AOS::AOS(const std::string &AOSPath, const std::string &BinPath, const std::string &BinArgs) : NOR(0) {
-
+AOS::AOS(bool ROIMode, const std::string &AOSPath, const std::string &BinPath, const std::string &BinArgs) : NOR(0) {
   auto InputBuffer = llvm::MemoryBuffer::getFile(AOSPath);
   llvm::yaml::Input yin(InputBuffer->get()->getBuffer());
 
@@ -26,7 +25,7 @@ AOS::AOS(const std::string &AOSPath, const std::string &BinPath, const std::stri
 
   switch(Params.mcStrategy) {
     case AOSParams::mcStrategyType::CBR:
-      //MLSolver = std::make_unique<CBRSolver>();
+      MLSolver = std::make_unique<CBRSolver>();
       break;
     case AOSParams::mcStrategyType::DPL:
       break;
@@ -44,15 +43,10 @@ AOS::AOS(const std::string &AOSPath, const std::string &BinPath, const std::stri
       break;
   }
 
-  setBinName(BinPath);
+  if(!ROIMode && !Params.Training)
+    MLSolver->loadDatabase(Params.Database);
 
-  if(Params.Training && Params.CreateDatabase) {
-    std::string CMD = "mkdir ";
-    CMD += Params.Database;
-    system(CMD.c_str());
-  }else if(!Params.Training){
-    //load database
-  }
+  setBinName(BinPath);
 }
 
 void AOS::run(llvm::Module *M, OIInstList OIRegion) {
@@ -61,10 +55,14 @@ void AOS::run(llvm::Module *M, OIInstList OIRegion) {
   if(Params.Training)
     iterativeCompilation(M, OIRegion);
   else
-    machineLearning(M);
+    machineLearning(M, OIRegion);
 }
 
-void AOS::machineLearning(llvm::Module *M) {}
+void AOS::machineLearning(llvm::Module *M, OIInstList OIRegion) {
+  std::string llvmDNA = CTZ->encode(M);
+  std::string oiDNA = CTZ->encode(OIRegion);
+  MLSolver->Solve(llvmDNA, oiDNA);
+}
 
 void AOS::run(llvm::Module *M, ROIInfo R) {
   NOR++;
@@ -74,9 +72,7 @@ void AOS::run(llvm::Module *M, ROIInfo R) {
 void AOS::iterativeCompilation(llvm::Module *M, OIInstList OIRegion) {
   std::string llvmDNA = CTZ->encode(M);
   std::string oiDNA = CTZ->encode(OIRegion);
-  
   auto ICData = ICSolver->Solve(M, NOR);
-  exit(0);
   auto DBData = makeDatabaseData(std::move(ICData), llvmDNA, oiDNA);
   generateDatabase(std::move(DBData));  
 }
@@ -167,18 +163,4 @@ void AOS::generateDatabase(std::unique_ptr<RegionData> RD) {
   File << Stream.str();
 
   File.close();
-}
-
-void AOS::loadDatabase() {
-  //RegionData RD;
-
-  //for(const auto & entry : fs::directory_iterator(Params.Database)) {
-  //  auto InputBuffer = llvm::MemoryBuffer::getFile((entry.path()).c_str());
-  //  llvm::yaml::Input yin(InputBuffer->get()->getBuffer());
-
-  //  yin >> RD;
-
-  //  std::cout << RD.DNA << std::endl;
-  //  std::cout << RD.Best.TAs.size() << std::endl;
-  //}
 }

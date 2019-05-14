@@ -10,7 +10,7 @@ double dbt::MachineModel::runOnMachine(std::vector<uint16_t> Genes, unsigned Reg
     return 2;
   }
 
-  dbt::AOS A(AOSPath, BinPath, BinArgs);
+  dbt::AOS A(true, AOSPath, BinPath, BinArgs);
   dbt::Manager TheManager(TheMachine->getDataMemOffset(), *(TheMachine.get()), A, false, false);
   TheManager.setOptPolicy(dbt::Manager::OptPolitic::Normal);
   TheManager.startCompilationThr();

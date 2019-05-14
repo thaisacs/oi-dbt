@@ -152,23 +152,19 @@ void GASolver::Solve(llvm::Module *M, ROIInfo R, unsigned RegionID) {
 void GASolver::Evaluate(unsigned RegionID) {
   unsigned Generation = 1;
     
-  CurrentPopulation->print();
-  
   while(Generation < Params.Generations) {
     auto Buffer = CurrentPopulation->crossover(Params.MutationRate);
     CurrentPopulation->calculateFitness(Region, RegionID, BinPath, BinArgs, AOSPath);
     CurrentPopulation->calculateProbability();
     CurrentPopulation->setBest();
-    CurrentPopulation->print();
 
     Historic.push_back(std::move(Buffer));
     
-    if(CurrentPopulation->getConvergenceCount() >= Params.convergenceThreshold)
-      std::cout << "convergence problem...\n";
-      //break;
+    //if(CurrentPopulation->getConvergenceCount() >= Params.convergenceThreshold)
+    //  break;
     
-    if(CurrentPopulation->calculateDiversity() <= Params.diversityThreshold)
-      CurrentPopulation->shake();
+    //if(CurrentPopulation->calculateDiversity() <= Params.diversityThreshold)
+    //  CurrentPopulation->shake();
     
     Generation++; 
   }
@@ -177,7 +173,6 @@ void GASolver::Evaluate(unsigned RegionID) {
 }
 
 void Population::shake() {
-  std::cout << "shake...\n";
   for(unsigned i = 1; i < Chromosomes.size(); i++) {
     Chromosomes[i]->mutate(0.016);
   }
@@ -197,9 +192,6 @@ void Population::setBest() {
   }else {
     if(Best->getFitness() > Chromosomes[Index]->getFitness()) {
       Best = std::unique_ptr<GADNA>(Chromosomes[Index]->clone());
-      convergenceCount = 0;
-      std::cout.precision(4);
-      std::cout << "FITNESSSSSS " <<std::fixed << Best->getFitness() << std::endl;
     }else {
       ++convergenceCount;
     }

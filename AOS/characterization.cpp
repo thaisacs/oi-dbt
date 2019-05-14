@@ -157,10 +157,10 @@ std::string DNAEncoding::encode(llvm::Module *M) {
             DNA.push_back('x');
             break;
           case llvm::Instruction::FPToSI:
-            DNA.push_back('w');
+            DNA.push_back('y');
             break;
           case llvm::Instruction::ICmp:
-            DNA.push_back('y');
+            DNA.push_back('w');
             break;
           case llvm::Instruction::FCmp:
             DNA.push_back('z');

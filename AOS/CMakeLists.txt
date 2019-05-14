@@ -4,6 +4,7 @@ add_library(AOS
   DNA.cpp
   IROpt.cpp 
   GASolver.cpp
+  CBRSolver.cpp
   searchSpace.cpp
   codeAnalyzer.cpp
   characterization.cpp

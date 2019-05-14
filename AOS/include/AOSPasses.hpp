@@ -4,7 +4,7 @@
 #include <iostream>
 
 #define MIN_OPT 1
-#define MAX_OPT 108
+#define MAX_OPT 109
 
 #define NONE 0
 #define BASICAA 1

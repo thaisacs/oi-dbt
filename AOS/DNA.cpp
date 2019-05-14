@@ -59,21 +59,15 @@ void DNA::setFitness(double F) {
 }
 
 void GADNA::print(const std::string& Database, const std::string& BinName, const std::string& NOR) {
+  std::ofstream myHistoric;
+  std::string HistName = Database + BinName + NOR + "H.txt";
+  myHistoric.open(HistName, std::ios::app);
   for(unsigned i = 0; i < Genes.size(); i++) {
-    std::cout << Genes[i] << " ";
+    myHistoric << Genes[i] << " ";
   }
-  std::cout.precision(4);
-  std::cout << "- " << std::fixed << Probability << std::endl;
-  std::cout << " " << Fitness << " " << " " << CompilationTime << " " << ExecutionTime << std::endl;
-  //std::ofstream myHistoric;
-  //std::string HistName = Database + BinName + NOR + "H.txt";
-  //myHistoric.open(HistName, std::ios::app);
-  //for(unsigned i = 0; i < Genes.size(); i++) {
-  //  myHistoric << Genes[i] << " ";
-  //}
-  //myHistoric << " - " << " CompilationTime: " << CompilationTime << 
-  //  " ExecutionTime: " << ExecutionTime << " Fitness " << Fitness << " Probability " << Probability << std::endl;
-  //myHistoric.close();
+  myHistoric << " - " << " CompilationTime: " << CompilationTime << 
+    " ExecutionTime: " << ExecutionTime << " Fitness " << Fitness << " Probability " << Probability << std::endl;
+  myHistoric.close();
 }
 
 double GADNA::getProbability() {
