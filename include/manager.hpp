@@ -85,7 +85,9 @@ namespace dbt {
 
       ROIInfo ROI;
 
-      std::vector<uint64_t> RegionTimes; 
+      //std::vector<uint64_t> RegionTimes; 
+      uint64_t RegionTimes; 
+      unsigned RTT; 
 
       std::unordered_map<uint32_t, llvm::Module*> ModulesLoaded;
       bool IsToLoadRegions = false;
@@ -108,7 +110,7 @@ namespace dbt {
       std::atomic<bool> isCompiling;
 
       Manager(uint32_t DMO, dbt::Machine& M, dbt::AOS& A, bool VO = false, bool Inline = false) : DataMemOffset(DMO), isRunning(true),
-      isFinished(false), VerboseOutput(VO), TheMachine(M), TheAOS(A), NumOfOIRegions(0), IsToInline(Inline) {
+      isFinished(false), VerboseOutput(VO), TheMachine(M), TheAOS(A), NumOfOIRegions(0), IsToInline(Inline), RegionTimes(0), RTT(0) {
         NativeRegions = new uint64_t[NATIVE_REGION_SIZE];
         memset((void*) NativeRegions, 0, sizeof(NativeRegions));
       }
@@ -183,15 +185,10 @@ namespace dbt {
       }
 
       uint64_t getRegionTime() {
-        uint64_t Time = 0;
-
-        if(!RegionTimes.size())
+        if(!RTT)
           return 0;
 
-        for(int i = 0; i < RegionTimes.size(); i++) {
-          Time += RegionTimes[i];
-        }
-        return ((double) Time)/RegionTimes.size();
+        return RegionTimes/RTT;
       }  
 
       unsigned getCompiledRegions (void){

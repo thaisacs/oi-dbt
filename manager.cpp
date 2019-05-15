@@ -283,13 +283,13 @@ int32_t Manager::jumpToRegion(uint32_t EntryAddress) {
   uint32_t* MemPtr = TheMachine.getMemoryPtr();
 
   while (isNativeRegionEntry(JumpTo)) {
-
     if(ROIMode && IRRegionsKey.size() >= ROI.RegionID && IRRegionsKey[ROI.RegionID - 1] == EntryAddress) {
       uint64_t start = rdtscp();
       JumpTo = ((uint32_t (*)(int32_t*, uint32_t*, uint32_t)) NativeRegions[JumpTo])(RegPtr, MemPtr, EntryAddress);
       uint64_t end = rdtscp();
-      RegionTimes.push_back(end - start);
-    } else {
+      RegionTimes += (end - start);
+      RTT++;
+    }else {
       JumpTo = ((uint32_t (*)(int32_t*, uint32_t*, uint32_t)) NativeRegions[JumpTo])(RegPtr, MemPtr, EntryAddress);
     }
   }

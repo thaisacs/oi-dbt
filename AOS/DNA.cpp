@@ -35,6 +35,11 @@ DNA::DNA(double CW, double EW, uint16_t T, std::vector<uint16_t> G) {
 void DNA::calculateFitness(std::unique_ptr<llvm::Module> M, unsigned RegionID, 
     const std::string &BinPath, const std::string &BinArgs, const std::string &AOSPath) {
   uint64_t OptTime;  
+  
+  for(unsigned i = 0; i < Genes.size(); i++)
+    std::cout << Genes[i] << " ";
+  std::cout << std::endl;
+  
   OptTime = CA->getOptTime(M.get(), Genes);	
   CompilationTime = CA->getCompilationTime(std::move(M));
   ExecutionTime = CA->getExecutionTime(Genes, RegionID, BinPath, BinArgs, AOSPath);

@@ -373,7 +373,6 @@ bool IROpt::optimizeIRFunction(llvm::Module *M, std::vector<uint16_t> Opts) {
   auto MPM = std::make_unique<llvm::legacy::PassManager>();
 
   populatePassManager(MPM.get(), FPM.get(), Opts);
-
   try {
     FPM->doInitialization();
 

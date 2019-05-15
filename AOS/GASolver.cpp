@@ -126,7 +126,7 @@ void Population::print(unsigned Generation, const std::string &Database,
 std::unique_ptr<GADNA> GASolver::Solve(llvm::Module* M, unsigned RegionID,
     const std::string &Database, const std::string &BinName) {
   Region = M;
-  
+
   CurrentPopulation = std::make_unique<Population>(Params, 
       M, RegionID, BinPath, BinArgs, AOSPath);
   CurrentPopulation->calculateProbability();
