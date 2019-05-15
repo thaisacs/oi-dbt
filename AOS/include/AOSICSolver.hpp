@@ -13,10 +13,11 @@ namespace dbt {
     AOSICSolver() {}
     virtual ~AOSICSolver() {}
     
-    virtual std::vector<std::vector<std::unique_ptr<GADNA>>> Solve(llvm::Module*, unsigned) = 0;
+    virtual std::unique_ptr<GADNA> Solve(llvm::Module*, unsigned, 
+        const std::string&, const std::string&) = 0;
     
     virtual void Solve(llvm::Module*, ROIInfo, unsigned) = 0;
     
-    virtual void Evaluate(unsigned) = 0;
+    virtual void Evaluate(unsigned, const std::string&, const std::string&) = 0;
   };
 }

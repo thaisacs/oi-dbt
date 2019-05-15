@@ -42,7 +42,7 @@ namespace dbt {
     void run(llvm::Module*, OIInstList);
     void run(llvm::Module*, ROIInfo); 
 
-    std::unique_ptr<RegionData> makeDatabaseData(std::vector<std::vector<std::unique_ptr<GADNA>>>, 
+    std::unique_ptr<RegionData> makeDatabaseData(std::unique_ptr<GADNA>, 
         const std::string&, const std::string&);
 
     void generateDatabase(std::unique_ptr<RegionData>);

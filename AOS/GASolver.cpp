@@ -22,9 +22,6 @@ Population::Population(const AOSParams::GASolverParams &Params, llvm::Module* M,
   for(unsigned i = BEST10_SET.size(); i < Params.PopulationSize; i++) {
     Buffer[i] = std::make_unique<GADNA>(Params.Max, Params.Min,
         Params.CompileWeight, Params.ExecutionWeight, Params.Times, InitialSearchSpaceType::RANDOM);
-    //Buffer[i] = std::make_unique<GADNA>(Params.Max, 
-    //    Params.CompileWeight, Params.ExecutionWeight, Params.Times, InitialSearchSpaceType::BEST10);
-    //Buffer[i]->mutate(0.25);
   }
   
   for(unsigned i = 0; i < Buffer.size(); i++) {
@@ -83,7 +80,7 @@ unsigned Population::pickOne() {
   return Index;
 }
 
-std::vector<std::unique_ptr<GADNA>> Population::crossover(double MutationRate) {
+void Population::crossover(double MutationRate) {
   std::vector<std::unique_ptr<GADNA>> NewChromosomes; 
   std::unique_ptr<GADNA> ChildOne, ChildTwo;
   unsigned ParentOne, ParentTwo;
@@ -113,33 +110,30 @@ std::vector<std::unique_ptr<GADNA>> Population::crossover(double MutationRate) {
     }
   }
   
-  auto OldChromosomes = std::move(Chromosomes);
   Chromosomes = std::move(NewChromosomes);
-
-  return std::move(OldChromosomes); 
 }
 
-void Population::print() {
-  std::cout << "BEST: ";
-  Best->print("", "", "");
-  std::cout << std::endl;
-  for(unsigned i = 0; i < Chromosomes.size(); i++) {
-    Chromosomes[i]->print("", "", "");
-  }
+void Population::print(unsigned Generation, const std::string &Database,
+    const std::string &BinName, const std::string &NOR) {
+  std::ofstream myHistoric;
+  std::string HistName = Database + BinName + NOR + "H.txt";
+  myHistoric.open(HistName, std::ios::app);
+  myHistoric << "Generation #" << std::to_string(Generation) << "\n";
+  myHistoric.close();
+  Best->print(Database, BinName, NOR);
 }
 
-std::vector<std::vector<std::unique_ptr<GADNA>>> GASolver::Solve(llvm::Module* M, unsigned RegionID) {
+std::unique_ptr<GADNA> GASolver::Solve(llvm::Module* M, unsigned RegionID,
+    const std::string &Database, const std::string &BinName) {
   Region = M;
   
   CurrentPopulation = std::make_unique<Population>(Params, 
       M, RegionID, BinPath, BinArgs, AOSPath);
   CurrentPopulation->calculateProbability();
-  
   CurrentPopulation->setBest();
-  
-  Evaluate(RegionID);
+  Evaluate(RegionID, Database, BinName);
 
-  return std::move(Historic);
+  return std::move(CurrentPopulation->getBest());
 }
 
 void GASolver::Solve(llvm::Module *M, ROIInfo R, unsigned RegionID) {
@@ -149,32 +143,21 @@ void GASolver::Solve(llvm::Module *M, ROIInfo R, unsigned RegionID) {
   }
 }
 
-void GASolver::Evaluate(unsigned RegionID) {
+void GASolver::Evaluate(unsigned RegionID, const std::string &Database, 
+    const std::string &BinName) {
   unsigned Generation = 1;
-    
+
+  CurrentPopulation->print(0, Database, BinName, std::to_string(RegionID));
+
   while(Generation < Params.Generations) {
-    auto Buffer = CurrentPopulation->crossover(Params.MutationRate);
+    CurrentPopulation->crossover(Params.MutationRate);
     CurrentPopulation->calculateFitness(Region, RegionID, BinPath, BinArgs, AOSPath);
     CurrentPopulation->calculateProbability();
     CurrentPopulation->setBest();
+    CurrentPopulation->print(Generation, Database, BinName, 
+        std::to_string(RegionID));
 
-    Historic.push_back(std::move(Buffer));
-    
-    //if(CurrentPopulation->getConvergenceCount() >= Params.convergenceThreshold)
-    //  break;
-    
-    //if(CurrentPopulation->calculateDiversity() <= Params.diversityThreshold)
-    //  CurrentPopulation->shake();
-    
     Generation++; 
-  }
-  
-  Historic.push_back(std::move(CurrentPopulation->getChromosomes()));
-}
-
-void Population::shake() {
-  for(unsigned i = 1; i < Chromosomes.size(); i++) {
-    Chromosomes[i]->mutate(0.016);
   }
 }
 

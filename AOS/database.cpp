@@ -9,7 +9,7 @@ using llvm::yaml::IO;
 void MappingTraits<RegionData>::mapping(IO &io, RegionData &D) {
   io.mapRequired("llvmDNA", D.llvmDNA);
   io.mapRequired("oiDNA", D.oiDNA);
-  io.mapRequired("BESTs", D.BESTs);
+  io.mapRequired("best", D.Best);
 }
 
 void MappingTraits<Data>::mapping(IO &io, Data &D) {

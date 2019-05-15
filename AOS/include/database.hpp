@@ -13,7 +13,7 @@ namespace dbt {
   struct RegionData {
     std::string llvmDNA;
     std::string oiDNA;
-    std::vector<Data> BESTs;
+    Data Best;
   };
 }
 

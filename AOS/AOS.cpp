@@ -23,7 +23,7 @@ AOS::AOS(bool ROIMode, const std::string &AOSPath, const std::string &BinPath, c
   ICSolver = std::make_unique<GASolver>(Params.icStrategy.Params.GAParams, 
       BinPath, BinArgs, AOSPath);
 
-  switch(Params.mcStrategy) {
+  switch(Params.mcStrategy.Value) {
     case AOSParams::mcStrategyType::CBR:
       MLSolver = std::make_unique<CBRSolver>();
       break;
@@ -72,53 +72,24 @@ void AOS::run(llvm::Module *M, ROIInfo R) {
 void AOS::iterativeCompilation(llvm::Module *M, OIInstList OIRegion) {
   std::string llvmDNA = CTZ->encode(M);
   std::string oiDNA = CTZ->encode(OIRegion);
-  auto ICData = ICSolver->Solve(M, NOR);
+  auto ICData = ICSolver->Solve(M, NOR, Params.Database, BinName);
   auto DBData = makeDatabaseData(std::move(ICData), llvmDNA, oiDNA);
   generateDatabase(std::move(DBData));  
 }
 
-std::unique_ptr<RegionData> AOS::makeDatabaseData(std::vector<std::vector<std::unique_ptr<GADNA>>> ICData, 
+std::unique_ptr<RegionData> AOS::makeDatabaseData(std::unique_ptr<GADNA> ICData, 
     const std::string& llvmDNA, const std::string& oiDNA) {
-
-  std::ofstream myHistoric;
-  std::string HistName = Params.Database + BinName + std::to_string(NOR) + "H.txt";
-  myHistoric.open(HistName, std::ios::app);
-  myHistoric.close();
-  
-  for(unsigned i = 0; i < ICData.size(); i++) {
-    std::ofstream myHistoric;
-    myHistoric.open(HistName, std::ios::app);
-    myHistoric << "Generation #" << std::to_string(i) << std::endl;
-    myHistoric.close();
-    for(unsigned j = 0; j < ICData[i].size(); j++) {
-      ICData[i][j]->print(Params.Database, BinName, std::to_string(NOR));
-    } 
-  }
   
   auto RD = std::make_unique<RegionData>();
   RD->llvmDNA = llvmDNA;
   RD->oiDNA = oiDNA;
 
-  std::vector<std::unique_ptr<GADNA>> Buffer;
-
-  for(unsigned i = 0; i < ICData.size(); i++) {
-    for(unsigned j = 0; j < ICData[i].size(); j++) {
-      Buffer.push_back(std::move(ICData[i][j]));
-    } 
-  }
-  
-  for(unsigned i = 0; i < ICData.size(); i++) {
-    std::sort(Buffer.begin(), Buffer.end(), less_than_fitness());
-  }
-  
-  for(unsigned i = 0; i < 10; i++) {
-    Data D;   
-    D.TAs = std::move((Buffer[i]->getGenes()));
-    D.CompilationTime = Buffer[i]->getCompilationTime();
-    D.ExecutionTime = Buffer[i]->getExecutionTime();
-    D.Fitness = Buffer[i]->getFitness();
-    RD->BESTs.push_back(D);
-  }
+  Data D;   
+  D.TAs = std::move((ICData->getGenes()));
+  D.CompilationTime = ICData->getCompilationTime();
+  D.ExecutionTime = ICData->getExecutionTime();
+  D.Fitness = ICData->getFitness();
+  RD->Best = D;
 
   return std::move(RD);
 }

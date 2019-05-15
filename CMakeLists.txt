@@ -15,10 +15,11 @@ set(CMAKE_CXX_ARCHIVE_FINISH   true)
 #SET(CMAKE_AR  "gcc-ar-7")
 #add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 
-include_directories(include AOS/include)
+include_directories(include AOS/include seqalign/include)
 
 add_subdirectory(RFT)
 add_subdirectory(AOS)
+#add_subdirectory(seqalign)
 add_subdirectory(arglib)
 
 add_library(dbt 
@@ -41,6 +42,7 @@ target_link_libraries(oi-dbt PUBLIC "LLVM-7" ${llvm_libs}
   papi 
   RFT 
   AOS
+  # seqalign
   dbt 
   arglib 
   pthread

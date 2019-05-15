@@ -27,6 +27,9 @@ training: true
 
 # Machine learning strategy
 mcStrategy: CBR 
+#mcStrategyParams:
+#  DNAStrategy: llvm # {llvm ou oi}
+#  amount: 5 # [1,10]
 #  - (CBR) Case-based reasoning
 #  - (DPL) Deep learning
 #  - (RFL) Reinforcement learning

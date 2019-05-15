@@ -18,7 +18,9 @@ void MappingTraits<AOSParams>::mapping(IO &io, AOSParams &Params) {
       io.mapRequired("icStrategyParams", Params.icStrategy.Params.RMHCParams);
   }
 
-  io.mapRequired("mcStrategy", Params.mcStrategy);
+  io.mapRequired("mcStrategy", Params.mcStrategy.Value);
+  //io.mapRequired("mcStrategyParams", Params.icStrategy.Params);
+
   io.mapRequired("characterization", Params.CharacterizationParam);
   io.mapRequired("retrieving", Params.RetrievingParam);
   io.mapRequired("similarity", Params.SimilarityParam);
@@ -51,8 +53,8 @@ void MappingTraits<AOSParams::RMHCSolverParams>::mapping(IO &io,
   io.mapRequired("min", Params.Min);
 }
 
-void ScalarEnumerationTraits<AOSParams::mcStrategyType>::enumeration(
-    IO &io, AOSParams::mcStrategyType& Param) {
+void ScalarEnumerationTraits<AOSParams::mcStrategyType::ValueType>::enumeration(
+    IO &io, AOSParams::mcStrategyType::ValueType& Param) {
   io.enumCase(Param, "CBR", 
       AOSParams::mcStrategyType::CBR);
   io.enumCase(Param, "DPL", 
@@ -62,6 +64,20 @@ void ScalarEnumerationTraits<AOSParams::mcStrategyType>::enumeration(
   io.enumCase(Param, "LTL", 
       AOSParams::mcStrategyType::LTL);
 }
+
+//void ScalarEnumerationTraits<AOSParams::mcStrategyType::ParamsType::DNAStrategyType>::enumeration(
+//    IO &io, AOSParams::mcStrategyType::ParamsType::DNAStrategyType& Param) {
+//  io.enumCase(Param, "llvm", 
+//      AOSParams::mcStrategyType::ParamsType::DNAStrategyType::llvm);
+//  io.enumCase(Param, "oi", 
+//      AOSParams::mcStrategyType::ParamsType::DNAStrategyType::oi);
+//}
+
+//void MappingTraits<AOSParams::mcStrategyType::ParamsType>::mapping(IO &io, 
+//    AOSParams::mcStrategyType::ParamsType &Params) {
+//  io.mapRequired("amount", Params.Amount);
+//  io.mapRequired("DNAStrategy", Params.DNAStrategy);
+//}
 
 void ScalarEnumerationTraits<AOSParams::CharacterizationType>::enumeration(
     IO &io, AOSParams::CharacterizationType& Param) {
