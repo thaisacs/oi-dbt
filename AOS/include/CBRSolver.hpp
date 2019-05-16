@@ -13,7 +13,7 @@ namespace dbt {
   class CBRSolver : public AOSMLSolver {
     std::vector<RegionData> DataSet;
   public:
-    CBRSolver(); 
+    CBRSolver() {}
     void Solve(const std::string&, const std::string&) override;
     void loadDatabase(const std::string&) override;
   };

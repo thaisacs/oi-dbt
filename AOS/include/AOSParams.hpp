@@ -46,7 +46,6 @@ namespace dbt {
     //    enum DNAStrategyType {
     //      llvm, oi
     //    } DNAStrategy;
-    //    uint8_t Amount;
     //  } Params;
     } mcStrategy;
 

@@ -19,8 +19,6 @@ void CBRSolver::Solve(const std::string &llvmDNA, const std::string &oiDNA) {
   std::cout << "Index " << Index << std::endl;
 }
     
-CBRSolver::CBRSolver() {}
-
 void CBRSolver::loadDatabase(const std::string &Database) {
   for(const auto & entry : std::experimental::filesystem::directory_iterator(Database)) {
     RegionData RD;

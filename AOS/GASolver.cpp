@@ -110,7 +110,10 @@ void Population::crossover(double MutationRate) {
     }
   }
   
+  //auto OldChromosomes = std::move(Chromosomes);
   Chromosomes = std::move(NewChromosomes);
+
+  //return std::move(OldChromosomes);
 }
 
 void Population::print(unsigned Generation, const std::string &Database,
@@ -119,8 +122,15 @@ void Population::print(unsigned Generation, const std::string &Database,
   std::string HistName = Database + BinName + NOR + "H.txt";
   myHistoric.open(HistName, std::ios::app);
   myHistoric << "Generation #" << std::to_string(Generation) << "\n";
+  myHistoric << "Best\n";
   myHistoric.close();
   Best->print(Database, BinName, NOR);
+  myHistoric.open(HistName, std::ios::app);
+  myHistoric << "\nHistoric\n";
+  myHistoric.close();
+  for(unsigned i = 0; i < Chromosomes.size(); i++) {
+    Chromosomes[i]->print(Database, BinName, NOR);
+  }
 }
 
 std::unique_ptr<GADNA> GASolver::Solve(llvm::Module* M, unsigned RegionID,
@@ -157,8 +167,12 @@ void GASolver::Evaluate(unsigned RegionID, const std::string &Database,
     CurrentPopulation->print(Generation, Database, BinName, 
         std::to_string(RegionID));
 
+    //Historic.push_back(std::move(Buffer));
+
     Generation++; 
   }
+
+  //Historic.push_back(std::move(CurrentPopulation->getChromosomes()));
 }
 
 void Population::setBest() {
