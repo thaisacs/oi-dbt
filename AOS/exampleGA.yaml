@@ -2,7 +2,7 @@
 
 updateDatabase: true
 
-database: test/
+database: /home/thais/Dev/database/ 
 
 # SECTION 1: Iterative Compilation
 
@@ -21,15 +21,14 @@ icStrategyParams:
 
 createDatabase: false 
 
-training: true 
+training: false 
 
 # SECTION 2: Machine Learning
 
 # Machine learning strategy
 mcStrategy: CBR 
-#mcStrategyParams:
-#  DNAStrategy: llvm # {llvm ou oi}
-#  amount: 5 # [1,10]
+mcStrategyParams:
+  DNA: llvm # {llvm or oi}
 #  - (CBR) Case-based reasoning
 #  - (DPL) Deep learning
 #  - (RFL) Reinforcement learning

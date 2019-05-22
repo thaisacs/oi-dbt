@@ -381,6 +381,7 @@ bool IROpt::optimizeIRFunction(llvm::Module *M, std::vector<uint16_t> Opts) {
     }
 
     MPM->run(*M);
+
     return true;
   }catch(int erro) {
     return false;

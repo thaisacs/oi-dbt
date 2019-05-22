@@ -25,7 +25,8 @@ AOS::AOS(bool ROIMode, const std::string &AOSPath, const std::string &BinPath, c
 
   switch(Params.mcStrategy.Value) {
     case AOSParams::mcStrategyType::CBR:
-      MLSolver = std::make_unique<CBRSolver>();
+      MLSolver = std::make_unique<CBRSolver>(Params.mcStrategy.Params, Params.SimilarityParam,
+          BinPath, BinArgs, AOSPath);
       break;
     case AOSParams::mcStrategyType::DPL:
       break;
@@ -51,7 +52,7 @@ AOS::AOS(bool ROIMode, const std::string &AOSPath, const std::string &BinPath, c
 
 void AOS::run(llvm::Module *M, OIInstList OIRegion) {
   NOR++;
-
+  
   if(Params.Training)
     iterativeCompilation(M, OIRegion);
   else
@@ -61,7 +62,7 @@ void AOS::run(llvm::Module *M, OIInstList OIRegion) {
 void AOS::machineLearning(llvm::Module *M, OIInstList OIRegion) {
   std::string llvmDNA = CTZ->encode(M);
   std::string oiDNA = CTZ->encode(OIRegion);
-  MLSolver->Solve(llvmDNA, oiDNA);
+  MLSolver->Solve(M, llvmDNA, oiDNA, NOR);
 }
 
 void AOS::run(llvm::Module *M, ROIInfo R) {
@@ -108,7 +109,7 @@ std::unique_ptr<RegionData> AOS::makeDatabaseData(std::unique_ptr<GADNA> ICData,
   D.CompilationTime = ICData->getCompilationTime();
   D.ExecutionTime = ICData->getExecutionTime();
   D.Fitness = ICData->getFitness();
-  RD->Best = D;
+  RD->BESTs.push_back(D);
   
   return std::move(RD);
 }

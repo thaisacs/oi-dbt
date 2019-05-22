@@ -11,7 +11,7 @@ DNA::DNA(unsigned Size, unsigned Min, double CW, double EW, uint16_t T, InitialS
   ExecutionWeight = EW;
   Times = T;
 
-  CA = llvm::make_unique<CodeAnalyzer>(T);
+  CA = llvm::make_unique<CodeAnalyzer>();
 
   if(Type == InitialSearchSpaceType::RANDOM) {
     Genes = std::move(SearchSpace::generateRandomSpace(Size, Min));
@@ -27,7 +27,7 @@ DNA::DNA(double CW, double EW, uint16_t T, std::vector<uint16_t> G) {
   ExecutionWeight = EW;
   Times = T;
 
-  CA = llvm::make_unique<CodeAnalyzer>(T);
+  CA = llvm::make_unique<CodeAnalyzer>();
 
   Genes = std::move(G);
 }

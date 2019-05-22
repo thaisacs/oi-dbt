@@ -15,7 +15,7 @@ namespace dbt {
     unsigned Times;
     std::unique_ptr<IROpt> IRO;
   public:
-    CodeAnalyzer(unsigned Times) : Times(Times) { 
+    CodeAnalyzer() : Times(Times) { 
       IRO = llvm::make_unique<IROpt>();
     }
     

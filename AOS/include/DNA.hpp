@@ -19,7 +19,6 @@ namespace dbt {
     double CompilationWeight, ExecutionWeight;
   public:
     DNA(double, double, uint16_t, std::vector<uint16_t>);
-    
     DNA(unsigned, unsigned, double, double, uint16_t, InitialSearchSpaceType);
 
     void calculateFitness(std::unique_ptr<llvm::Module>, unsigned, const std::string&,

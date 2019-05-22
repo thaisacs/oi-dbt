@@ -19,7 +19,7 @@ void MappingTraits<AOSParams>::mapping(IO &io, AOSParams &Params) {
   }
 
   io.mapRequired("mcStrategy", Params.mcStrategy.Value);
-  //io.mapRequired("mcStrategyParams", Params.icStrategy.Params);
+  io.mapRequired("mcStrategyParams", Params.mcStrategy.Params);
 
   io.mapRequired("characterization", Params.CharacterizationParam);
   io.mapRequired("retrieving", Params.RetrievingParam);
@@ -47,6 +47,16 @@ void MappingTraits<AOSParams::GASolverParams>::mapping(IO &io,
   io.mapRequired("convergenceThreshold", Params.convergenceThreshold);
 }
 
+void MappingTraits<AOSParams::mcStrategyType::ParamsType>::mapping(IO &io, 
+    AOSParams::mcStrategyType::ParamsType &Params) {
+  io.mapRequired("DNA", Params.DNA);
+}
+
+//void ScalarEnumerationTraits<AOSParams::mcStrategyType::ParamsType>::enumeration(
+//    IO &io, AOSParams::mcStrategyType::ParamsType &Params) {
+//  io.mapRequired("DNA", Params.DNA);
+//}
+
 void MappingTraits<AOSParams::RMHCSolverParams>::mapping(IO &io, 
     AOSParams::RMHCSolverParams &Params) {
   io.mapRequired("max", Params.Max);
@@ -65,19 +75,13 @@ void ScalarEnumerationTraits<AOSParams::mcStrategyType::ValueType>::enumeration(
       AOSParams::mcStrategyType::LTL);
 }
 
-//void ScalarEnumerationTraits<AOSParams::mcStrategyType::ParamsType::DNAStrategyType>::enumeration(
-//    IO &io, AOSParams::mcStrategyType::ParamsType::DNAStrategyType& Param) {
-//  io.enumCase(Param, "llvm", 
-//      AOSParams::mcStrategyType::ParamsType::DNAStrategyType::llvm);
-//  io.enumCase(Param, "oi", 
-//      AOSParams::mcStrategyType::ParamsType::DNAStrategyType::oi);
-//}
-
-//void MappingTraits<AOSParams::mcStrategyType::ParamsType>::mapping(IO &io, 
-//    AOSParams::mcStrategyType::ParamsType &Params) {
-//  io.mapRequired("amount", Params.Amount);
-//  io.mapRequired("DNAStrategy", Params.DNAStrategy);
-//}
+void ScalarEnumerationTraits<AOSParams::mcStrategyType::ParamsType::DNAType>::enumeration(
+    IO &io, AOSParams::mcStrategyType::ParamsType::DNAType& Param) {
+  io.enumCase(Param, "llvm", 
+      AOSParams::mcStrategyType::ParamsType::DNAType::llvm);
+  io.enumCase(Param, "oi", 
+      AOSParams::mcStrategyType::ParamsType::DNAType::oi);
+}
 
 void ScalarEnumerationTraits<AOSParams::CharacterizationType>::enumeration(
     IO &io, AOSParams::CharacterizationType& Param) {
@@ -106,4 +110,3 @@ void ScalarEnumerationTraits<AOSParams::SimilarityType>::enumeration(
   io.enumCase(Param, "CMP", 
       AOSParams::SimilarityType::CMP);
 }
-

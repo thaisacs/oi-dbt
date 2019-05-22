@@ -42,11 +42,11 @@ namespace dbt {
       enum ValueType {
         CBR, DPL, RFL, LTL
       } Value;
-    //  struct ParamsType {
-    //    enum DNAStrategyType {
-    //      llvm, oi
-    //    } DNAStrategy;
-    //  } Params;
+      struct ParamsType {
+        enum DNAType {
+          llvm, oi
+        } DNA;
+      } Params;
     } mcStrategy;
 
     enum CharacterizationType {
@@ -79,6 +79,10 @@ template <> struct llvm::yaml::MappingTraits<dbt::AOSParams::GASolverParams> {
   static void mapping(llvm::yaml::IO &io, dbt::AOSParams::GASolverParams&);
 };
 
+template <> struct llvm::yaml::MappingTraits<dbt::AOSParams::mcStrategyType::ParamsType> {
+  static void mapping(llvm::yaml::IO &io, dbt::AOSParams::mcStrategyType::ParamsType&);
+};
+
 template <> struct llvm::yaml::MappingTraits<dbt::AOSParams::RMHCSolverParams> {
   static void mapping(llvm::yaml::IO &, dbt::AOSParams::RMHCSolverParams&);
 };
@@ -89,13 +93,9 @@ struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::Value
       dbt::AOSParams::mcStrategyType::ValueType&);
 };
 
-//template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::ParamsType::DNAStrategyType> {
-//  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::mcStrategyType::ParamsType::DNAStrategyType&);
-//};
-
-//template <> struct llvm::yaml::MappingTraits<dbt::AOSParams::mcStrategyType::ParamsType> {
-//  static void mapping(llvm::yaml::IO &io, dbt::AOSParams::mcStrategyType::ParamsType&);
-//};
+template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::ParamsType::DNAType> {
+  static void enumeration(llvm::yaml::IO &, dbt::AOSParams::mcStrategyType::ParamsType::DNAType&);
+};
 
 template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::CharacterizationType> {
   static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::CharacterizationType&);

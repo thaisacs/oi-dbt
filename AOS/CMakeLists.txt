@@ -9,4 +9,5 @@ add_library(AOS
   codeAnalyzer.cpp
   characterization.cpp
   database.cpp
+  similarity.cpp
   util.cpp)
