@@ -46,6 +46,8 @@ namespace dbt {
         enum DNAType {
           llvm, oi
         } DNA;
+        double CompileWeight;
+        double ExecutionWeight;
       } Params;
     } mcStrategy;
 

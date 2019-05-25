@@ -2,7 +2,7 @@
 
 updateDatabase: true
 
-database: /home/thais/Dev/database/ 
+database: /home/thais/Dev/test/ 
 
 # SECTION 1: Iterative Compilation
 
@@ -29,6 +29,8 @@ training: false
 mcStrategy: CBR 
 mcStrategyParams:
   DNA: llvm # {llvm or oi}
+  compileWeight: 0.1
+  executionWeight: 0.9
 #  - (CBR) Case-based reasoning
 #  - (DPL) Deep learning
 #  - (RFL) Reinforcement learning

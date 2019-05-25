@@ -110,10 +110,7 @@ void Population::crossover(double MutationRate) {
     }
   }
   
-  //auto OldChromosomes = std::move(Chromosomes);
   Chromosomes = std::move(NewChromosomes);
-
-  //return std::move(OldChromosomes);
 }
 
 void Population::print(unsigned Generation, const std::string &Database,
@@ -167,12 +164,8 @@ void GASolver::Evaluate(unsigned RegionID, const std::string &Database,
     CurrentPopulation->print(Generation, Database, BinName, 
         std::to_string(RegionID));
 
-    //Historic.push_back(std::move(Buffer));
-
     Generation++; 
   }
-
-  //Historic.push_back(std::move(CurrentPopulation->getChromosomes()));
 }
 
 void Population::setBest() {

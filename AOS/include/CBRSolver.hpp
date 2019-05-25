@@ -8,6 +8,7 @@
 #include <vector>
 #include <similarity.hpp>
 #include <AOSParams.hpp>
+#include <IROpt.hpp>
 
 #include "llvm/IR/Module.h"
 #include "llvm/Transforms/Utils/Cloning.h"
@@ -21,7 +22,7 @@ namespace dbt {
         const std::string& BinPath, const std::string& BinArgs, const std::string& AOSPath): 
       Params(Params), AOSMLSolver(S, BinPath, BinArgs, AOSPath) {
     }
-    void Solve(llvm::Module *M, const std::string&, const std::string&, unsigned) override;
+    Data Solve(llvm::Module *M, const std::string&, const std::string&, unsigned) override;
     void loadDatabase(const std::string&) override;
   };
 }

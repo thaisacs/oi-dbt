@@ -50,12 +50,9 @@ void MappingTraits<AOSParams::GASolverParams>::mapping(IO &io,
 void MappingTraits<AOSParams::mcStrategyType::ParamsType>::mapping(IO &io, 
     AOSParams::mcStrategyType::ParamsType &Params) {
   io.mapRequired("DNA", Params.DNA);
+  io.mapRequired("compileWeight", Params.CompileWeight);
+  io.mapRequired("executionWeight", Params.ExecutionWeight);
 }
-
-//void ScalarEnumerationTraits<AOSParams::mcStrategyType::ParamsType>::enumeration(
-//    IO &io, AOSParams::mcStrategyType::ParamsType &Params) {
-//  io.mapRequired("DNA", Params.DNA);
-//}
 
 void MappingTraits<AOSParams::RMHCSolverParams>::mapping(IO &io, 
     AOSParams::RMHCSolverParams &Params) {

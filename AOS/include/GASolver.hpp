@@ -45,7 +45,6 @@ namespace dbt {
     AOSParams::GASolverParams Params;
     std::string BinPath, BinArgs, AOSPath;
     std::unique_ptr<Population> CurrentPopulation;
-    //std::vector<std::vector<std::unique_ptr<GADNA>>> Historic;
     llvm::Module* Region;
   public:
     GASolver(const AOSParams::GASolverParams &Params, const std::string &BinPath,

@@ -4,28 +4,62 @@
 
 using namespace dbt;
 
-void CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::string &oiDNA,
+Data CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::string &oiDNA,
     unsigned RegionID) {
-  unsigned Index = 0;
-  int Max = SM->run(llvmDNA, oiDNA);
   
-  for(unsigned i = 1; i < DataSet.size(); i++) {
-    int Buffer = SM->run(llvmDNA, DataSet[i].llvmDNA);
-    if(Buffer > Max) {
-      Max = Buffer;
-      Index = i;
-    }
-  }
+  unsigned Index = 0;
 
+  switch(Params.DNA) {
+    int Max;
+    case AOSParams::mcStrategyType::ParamsType::DNAType::llvm:
+      Max = SM->run(llvmDNA, DataSet[Index].llvmDNA);
+      for(unsigned i = 1; i < DataSet.size(); i++) {
+        int Buffer = SM->run(llvmDNA, DataSet[i].llvmDNA);
+        if(Buffer > Max) {
+          Max = Buffer;
+          Index = i;
+        }
+      }
+      break;
+    case AOSParams::mcStrategyType::ParamsType::DNAType::oi:
+      Max = SM->run(oiDNA, DataSet[Index].oiDNA);
+      for(unsigned i = 1; i < DataSet.size(); i++) {
+        int Buffer = SM->run(oiDNA, DataSet[i].oiDNA);
+        if(Buffer > Max) {
+          Max = Buffer;
+          Index = i;
+        }
+      }
+      break;
+  }
+ 
+  unsigned BestIndex;
+  Data D;   
+  D.Fitness;
   for(unsigned i = 0; i < DataSet[Index].BESTs.size(); i++) {
     auto CM = llvm::CloneModule(*M); 
     auto OT = CA->getOptTime(CM.get(), DataSet[Index].BESTs[i].TAs);	
     auto CT = CA->getCompilationTime(std::move(CM));
     auto ET = CA->getExecutionTime(DataSet[Index].BESTs[i].TAs, RegionID, BinPath, BinArgs, AOSPath);
+    
     CT += OT;
   
-    std::cout << OT << " " << ET << std::endl;
+    auto Buffer =  Params.CompileWeight*CT + Params.ExecutionWeight*ET;
+    
+    if(Buffer < D.Fitness) {
+      BestIndex = i;
+      D.Fitness = Buffer;
+      D.CompilationTime = CT; 
+      D.ExecutionTime = ET;
+    }
   }
+
+  auto IRO = llvm::make_unique<IROpt>();
+  IRO->optimizeIRFunction(M, DataSet[Index].BESTs[BestIndex].TAs);
+  
+  D.TAs = std::move(DataSet[Index].BESTs[BestIndex].TAs);
+  
+  return D;
 }
     
 void CBRSolver::loadDatabase(const std::string &Database) {

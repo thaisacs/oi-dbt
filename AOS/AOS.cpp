@@ -62,7 +62,17 @@ void AOS::run(llvm::Module *M, OIInstList OIRegion) {
 void AOS::machineLearning(llvm::Module *M, OIInstList OIRegion) {
   std::string llvmDNA = CTZ->encode(M);
   std::string oiDNA = CTZ->encode(OIRegion);
-  MLSolver->Solve(M, llvmDNA, oiDNA, NOR);
+  auto MLData = MLSolver->Solve(M, llvmDNA, oiDNA, NOR);
+  
+  std::ofstream FileResult;
+  std::string HistName = BinName + std::to_string(NOR) + "CBR.txt";
+  FileResult.open(HistName, std::ios::app);
+  for(unsigned i = 0; i < MLData.TAs.size(); i++) {
+    FileResult << MLData.TAs[i] << " ";
+  }
+  FileResult << " - " << " CompilationTime: " << MLData.CompilationTime << 
+    " ExecutionTime: " << MLData.ExecutionTime << " Fitness " << MLData.Fitness << std::endl;
+  FileResult.close();
 }
 
 void AOS::run(llvm::Module *M, ROIInfo R) {
@@ -85,25 +95,6 @@ std::unique_ptr<RegionData> AOS::makeDatabaseData(std::unique_ptr<GADNA> ICData,
   RD->llvmDNA = llvmDNA;
   RD->oiDNA = oiDNA;
 
-  //std::vector<std::unique_ptr<GADNA>> Buffer;
-
-  //for(unsigned i = 0; i < ICData.size(); i++) {
-  //  for(unsigned j = 0; j < ICData[i].size(); j++) {
-  //    Buffer.push_back(std::move(ICData[i][j]));
-  //  }
-  //}
-
-  //std::sort(Buffer.begin(), Buffer.end(), less_than_fitness());
-
-  //for(unsigned i = 0; i < 10; i++) {
-  //  Data D;
-  //  D.TAs = std::move((Buffer[i]->getGenes()));
-  //  D.CompilationTime = Buffer[i]->getCompilationTime();
-  //  D.ExecutionTime = Buffer[i]->getExecutionTime();
-  //  D.Fitness = Buffer[i]->getFitness();
-  //  RD->BESTs.push_back(D);
-  //}
-  
   Data D;   
   D.TAs = std::move((ICData->getGenes()));
   D.CompilationTime = ICData->getCompilationTime();

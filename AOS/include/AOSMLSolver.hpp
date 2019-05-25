@@ -6,6 +6,7 @@
 #include <similarity.hpp>
 #include <AOSParams.hpp>
 #include <codeAnalyzer.hpp>
+#include <database.hpp>
 
 #include "llvm/IR/Module.h"
 
@@ -26,7 +27,7 @@ namespace dbt {
     
       CA = std::make_unique<CodeAnalyzer>();
     }
-    virtual void Solve(llvm::Module *M, const std::string&, const std::string&, unsigned) = 0;
+    virtual Data Solve(llvm::Module *M, const std::string&, const std::string&, unsigned) = 0;
     virtual void loadDatabase(const std::string&) = 0;
   };
 }
