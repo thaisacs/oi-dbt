@@ -10,6 +10,7 @@
 #include <GASolver.hpp>
 #include <characterization.hpp>
 #include <database.hpp>
+#include <AOSPasses.hpp>
 
 #include <string>
 
@@ -34,7 +35,7 @@ namespace dbt {
 
     std::unique_ptr<Characterization> CTZ;
     
-    std::string BinName;
+    std::string BinName, BinPath, BinArgs, AOSPath;
     unsigned NOR; //Number Of Regions
     public:
     AOS(bool ROIMode, const std::string&, const std::string&, const std::string&); 
@@ -54,5 +55,6 @@ namespace dbt {
     void setBinName(const std::string&);
     void iterativeCompilation(llvm::Module*, OIInstList);
     void machineLearning(llvm::Module*, OIInstList);
+    void baseline(llvm::Module *M); 
   };
 }

@@ -387,3 +387,5 @@ bool IROpt::optimizeIRFunction(llvm::Module *M, std::vector<uint16_t> Opts) {
     return false;
   }
 }
+
+

@@ -11,6 +11,10 @@ namespace dbt {
     std::string Database;
     bool Training;
 
+    enum OptimizationType {
+      STATIC, DYNAMIC
+    } Optimization;
+    
     struct SolverParams {
       unsigned Max, Min, Times;
 
@@ -105,6 +109,10 @@ template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::Character
 
 template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::RetrievingType> {
   static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::RetrievingType&);
+};
+
+template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::OptimizationType> {
+  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::OptimizationType&);
 };
 
 template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::SimilarityType> {

@@ -54,6 +54,7 @@ namespace dbt {
     std::unique_ptr<GADNA> Solve(llvm::Module*, unsigned, 
         const std::string&, const std::string&) override;
     void Solve(llvm::Module*, ROIInfo, unsigned) override;
+    
     void Evaluate(unsigned, const std::string&, const std::string&) override;
   };
 }

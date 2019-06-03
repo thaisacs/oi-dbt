@@ -35,7 +35,7 @@ Data CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::st
  
   unsigned BestIndex;
   Data D;   
-  D.Fitness;
+  D.Fitness = 100000000000000;
   for(unsigned i = 0; i < DataSet[Index].BESTs.size(); i++) {
     auto CM = llvm::CloneModule(*M); 
     auto OT = CA->getOptTime(CM.get(), DataSet[Index].BESTs[i].TAs);	
@@ -57,7 +57,7 @@ Data CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::st
   auto IRO = llvm::make_unique<IROpt>();
   IRO->optimizeIRFunction(M, DataSet[Index].BESTs[BestIndex].TAs);
   
-  D.TAs = std::move(DataSet[Index].BESTs[BestIndex].TAs);
+  D.TAs = DataSet[Index].BESTs[BestIndex].TAs;
   
   return D;
 }

@@ -48,15 +48,42 @@ AOS::AOS(bool ROIMode, const std::string &AOSPath, const std::string &BinPath, c
     MLSolver->loadDatabase(Params.Database);
 
   setBinName(BinPath);
+  this->BinPath = BinPath;
+  this->BinArgs = BinArgs;
+  this->AOSPath = AOSPath;
 }
 
 void AOS::run(llvm::Module *M, OIInstList OIRegion) {
   NOR++;
   
-  if(Params.Training)
-    iterativeCompilation(M, OIRegion);
+  if(Params.Optimization == AOSParams::OptimizationType::STATIC)
+    baseline(M);  
   else
-    machineLearning(M, OIRegion);
+    if(Params.Training)
+      iterativeCompilation(M, OIRegion);
+    else
+      machineLearning(M, OIRegion);
+}
+
+void AOS::baseline(llvm::Module *M) {
+  std::vector<uint16_t> TAs = {INSTCOMBINE, SIMPLIFYCFG, REASSOCIATE, _GVN, DIE, DCE, INSTCOMBINE, LICM, 
+        MEMCPYOPT, LOOP_UNSWITCH, INSTCOMBINE, INDVARS, LOOP_DELETION, LOOP_PREDICATION, LOOP_UNROLL,
+        SIMPLIFYCFG, INSTCOMBINE, LICM, _GVN};
+  
+  auto CA = std::make_unique<CodeAnalyzer>();
+  auto OT = CA->getOptTime(M, TAs);	
+  auto CM = llvm::CloneModule(*M); 
+  auto CT = CA->getCompilationTime(std::move(CM));
+  auto ET = CA->getExecutionTime(TAs, NOR, BinPath, BinArgs, AOSPath);
+  
+  CT += OT;
+
+  std::ofstream FileResult;
+  std::string HistName = BinName + std::to_string(NOR) + "Static.txt";
+  FileResult.open(HistName, std::ios::app);
+  FileResult << " - " << " CompilationTime: " << CT << 
+    " ExecutionTime: " << ET << std::endl;
+  FileResult.close();
 }
 
 void AOS::machineLearning(llvm::Module *M, OIInstList OIRegion) {
@@ -81,11 +108,13 @@ void AOS::run(llvm::Module *M, ROIInfo R) {
 }
 
 void AOS::iterativeCompilation(llvm::Module *M, OIInstList OIRegion) {
-  std::string llvmDNA = CTZ->encode(M);
-  std::string oiDNA = CTZ->encode(OIRegion);
-  auto ICData = ICSolver->Solve(M, NOR, Params.Database, BinName);
-  auto DBData = makeDatabaseData(std::move(ICData), llvmDNA, oiDNA);
-  generateDatabase(std::move(DBData));  
+  if(NOR > 23) {
+    std::string llvmDNA = CTZ->encode(M);
+    std::string oiDNA = CTZ->encode(OIRegion);
+    auto ICData = ICSolver->Solve(M, NOR, Params.Database, BinName);
+    auto DBData = makeDatabaseData(std::move(ICData), llvmDNA, oiDNA);
+    generateDatabase(std::move(DBData));
+  }
 }
 
 std::unique_ptr<RegionData> AOS::makeDatabaseData(std::unique_ptr<GADNA> ICData, 

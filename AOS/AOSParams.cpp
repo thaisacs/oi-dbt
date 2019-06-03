@@ -8,6 +8,8 @@ void MappingTraits<AOSParams>::mapping(IO &io, AOSParams &Params) {
   io.mapRequired("createDatabase", Params.CreateDatabase);
   io.mapRequired("training", Params.Training);
   io.mapRequired("database", Params.Database);
+  io.mapRequired("optimization", Params.Optimization);
+  
   io.mapRequired("icStrategy", Params.icStrategy.Value);
 
   switch(Params.icStrategy.Value) {
@@ -98,6 +100,14 @@ void ScalarEnumerationTraits<AOSParams::RetrievingType>::enumeration(
       AOSParams::RetrievingType::JUST);
   io.enumCase(Param, "NEARLY", 
       AOSParams::RetrievingType::NEARLY);
+}
+
+void ScalarEnumerationTraits<AOSParams::OptimizationType>::enumeration(
+    IO &io, AOSParams::OptimizationType& Param) {
+  io.enumCase(Param, "static", 
+      AOSParams::OptimizationType::STATIC);
+  io.enumCase(Param, "dynamic", 
+      AOSParams::OptimizationType::DYNAMIC);
 }
 
 void ScalarEnumerationTraits<AOSParams::SimilarityType>::enumeration(

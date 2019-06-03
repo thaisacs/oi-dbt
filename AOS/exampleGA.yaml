@@ -2,7 +2,9 @@
 
 updateDatabase: true
 
-database: /home/thais/Dev/test/ 
+database: test/ 
+
+optimization: dynamic # {static or dynamic}
 
 # SECTION 1: Iterative Compilation
 
@@ -21,14 +23,14 @@ icStrategyParams:
 
 createDatabase: false 
 
-training: false 
+training: true
 
 # SECTION 2: Machine Learning
 
 # Machine learning strategy
 mcStrategy: CBR 
 mcStrategyParams:
-  DNA: llvm # {llvm or oi}
+  DNA: oi # {llvm or oi}
   compileWeight: 0.1
   executionWeight: 0.9
 #  - (CBR) Case-based reasoning

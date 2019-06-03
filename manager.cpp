@@ -160,9 +160,6 @@ void Manager::runPipeline() {
         for (auto& BB : F)
           Size += BB.size();
 
-      //if(!ROIMode)
-      //  std::cout << "Size: " << Size << std::endl;
-
       if(ROIMode)
         TheAOS.run(Module, ROI);
       else
@@ -174,9 +171,6 @@ void Manager::runPipeline() {
       for (auto& F : *Module)
         for (auto& BB : F)
           OSize += BB.size();
-      
-      //if(!ROIMode)
-      //  std::cout << "OSize: " << OSize << std::endl;
     }
 
     // Remove a region if the first instruction is a return <- can cause infinity loops
