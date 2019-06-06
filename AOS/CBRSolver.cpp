@@ -6,7 +6,6 @@ using namespace dbt;
 
 Data CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::string &oiDNA,
     unsigned RegionID) {
-  
   unsigned Index = 0;
 
   switch(Params.DNA) {

@@ -2,7 +2,7 @@
 
 updateDatabase: true
 
-database: test/ 
+database: /home/thais/Dev/database/zdata4/ 
 
 optimization: dynamic # {static or dynamic}
 
@@ -23,14 +23,14 @@ icStrategyParams:
 
 createDatabase: false 
 
-training: true
+training: false
 
 # SECTION 2: Machine Learning
 
 # Machine learning strategy
 mcStrategy: CBR 
 mcStrategyParams:
-  DNA: oi # {llvm or oi}
+  DNA: llvm # {llvm or oi}
   compileWeight: 0.1
   executionWeight: 0.9
 #  - (CBR) Case-based reasoning

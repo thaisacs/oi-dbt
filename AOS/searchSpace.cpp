@@ -29,7 +29,6 @@ std::vector<uint16_t> SearchSpace::generateBest10Space(unsigned Size) {
   }
 
   ++Index;
-
   Index = Index % BEST10_SET.size();
 
   return std::move(Genes);
