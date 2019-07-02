@@ -22,7 +22,7 @@ double dbt::MachineModel::runOnMachine(std::vector<uint16_t> Genes, unsigned Reg
   
   TheManager.setROI(ROI);
   TheManager.setROIMode();
-  TheManager.setLockMode();
+  TheManager.setLockMode(true);
 
   dbt::Timer GlobalTimer;
 

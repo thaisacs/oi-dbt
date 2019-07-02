@@ -172,7 +172,6 @@ void Manager::runPipeline() {
         for (auto& BB : F)
           OSize += BB.size();
     }
-
     // Remove a region if the first instruction is a return <- can cause infinity loops
     llvm::Function* LLVMRegion = Module->getFunction("r"+std::to_string(EntryAddress));
 
@@ -247,7 +246,8 @@ void Manager::runPipeline() {
     OIRegionsKey.erase(OIRegionsKey.begin());
     OIRegionsMtx.unlock();
     
-    cvRFT.notify_all();
+    if(LockMode)
+      cvRFT.notify_all();
 
 		if (IsToDoWholeCompilation) {
 			isFinished = true;
@@ -276,6 +276,7 @@ int32_t Manager::jumpToRegion(uint32_t EntryAddress) {
   int32_t* RegPtr  = TheMachine.getRegisterPtr();
   uint32_t* MemPtr = TheMachine.getMemoryPtr();
 
+  
   while (isNativeRegionEntry(JumpTo)) {
     if(ROIMode && IRRegionsKey.size() >= ROI.RegionID && IRRegionsKey[ROI.RegionID - 1] == EntryAddress) {
       uint64_t start = rdtscp();

@@ -10,6 +10,7 @@ namespace dbt {
     bool CreateDatabase;
     std::string Database;
     bool Training;
+    bool DumpData;
 
     enum OptimizationType {
       STATIC, DYNAMIC
@@ -50,6 +51,7 @@ namespace dbt {
         enum DNAType {
           llvm, oi
         } DNA;
+        bool Serialized;
         double CompileWeight;
         double ExecutionWeight;
       } Params;

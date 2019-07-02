@@ -69,52 +69,60 @@ void AOS::baseline(llvm::Module *M) {
   std::vector<uint16_t> TAs = {INSTCOMBINE, SIMPLIFYCFG, REASSOCIATE, _GVN, DIE, DCE, INSTCOMBINE, LICM, 
         MEMCPYOPT, LOOP_UNSWITCH, INSTCOMBINE, INDVARS, LOOP_DELETION, LOOP_PREDICATION, LOOP_UNROLL,
         SIMPLIFYCFG, INSTCOMBINE, LICM, _GVN};
-  
+ 
   auto CA = std::make_unique<CodeAnalyzer>();
   auto OT = CA->getOptTime(M, TAs);	
-  auto CM = llvm::CloneModule(*M); 
-  auto CT = CA->getCompilationTime(std::move(CM));
-  auto ET = CA->getExecutionTime(TAs, NOR, BinPath, BinArgs, AOSPath);
   
-  CT += OT;
+  if(Params.DumpData) {
+    auto CM = llvm::CloneModule(*M); 
+    auto CT = CA->getCompilationTime(std::move(CM));
+    auto ET = CA->getExecutionTime(TAs, NOR, BinPath, BinArgs, AOSPath);
+    CT += OT;
 
-  std::ofstream FileResult;
-  std::string HistName = BinName + std::to_string(NOR) + "Static.txt";
-  FileResult.open(HistName, std::ios::app);
-  FileResult << " - " << " CompilationTime: " << CT << 
-    " ExecutionTime: " << ET << std::endl;
-  FileResult.close();
+    std::ofstream FileResult;
+    std::string HistName = BinName + std::to_string(NOR) + "Static.txt";
+    FileResult.open(HistName, std::ios::app);
+    FileResult << " - " << " CompilationTime: " << CT << 
+      " ExecutionTime: " << ET << std::endl;
+    FileResult.close();
+  }
 }
 
 void AOS::machineLearning(llvm::Module *M, OIInstList OIRegion) {
   std::string llvmDNA = CTZ->encode(M);
   std::string oiDNA = CTZ->encode(OIRegion);
-  auto MLData = MLSolver->Solve(M, llvmDNA, oiDNA, NOR);
   
-  std::ofstream FileResult;
-  std::string HistName = BinName + std::to_string(NOR) + "CBR.txt";
-  FileResult.open(HistName, std::ios::app);
-  for(unsigned i = 0; i < MLData.TAs.size(); i++) {
-    FileResult << MLData.TAs[i] << " ";
+  
+  if(Params.mcStrategy.Params.Serialized) {
+    auto MLData = MLSolver->Solve(M, llvmDNA, oiDNA, NOR);
+    
+    if(Params.DumpData) {
+      std::ofstream FileResult;
+      std::string HistName = BinName + std::to_string(NOR) + "CBR.txt";
+      FileResult.open(HistName, std::ios::app);
+      for(unsigned i = 0; i < MLData.TAs.size(); i++) {
+        FileResult << MLData.TAs[i] << " ";
+      }
+      FileResult << " - " << " CompilationTime: " << MLData.CompilationTime << 
+        " ExecutionTime: " << MLData.ExecutionTime << " Fitness " << MLData.Fitness << std::endl;
+      FileResult.close();
+    }
+  }else {
+    MLSolver->Solve(M, llvmDNA, oiDNA);
   }
-  FileResult << " - " << " CompilationTime: " << MLData.CompilationTime << 
-    " ExecutionTime: " << MLData.ExecutionTime << " Fitness " << MLData.Fitness << std::endl;
-  FileResult.close();
+}
+
+void AOS::iterativeCompilation(llvm::Module *M, OIInstList OIRegion) {
+  std::string llvmDNA = CTZ->encode(M);
+  std::string oiDNA = CTZ->encode(OIRegion);
+  auto ICData = ICSolver->Solve(M, NOR, Params.Database, BinName);
+  auto DBData = makeDatabaseData(std::move(ICData), llvmDNA, oiDNA);
+  generateDatabase(std::move(DBData));
 }
 
 void AOS::run(llvm::Module *M, ROIInfo R) {
   NOR++;
   ICSolver->Solve(M, R, NOR);
-}
-
-void AOS::iterativeCompilation(llvm::Module *M, OIInstList OIRegion) {
-  if(NOR > 23) {
-    std::string llvmDNA = CTZ->encode(M);
-    std::string oiDNA = CTZ->encode(OIRegion);
-    auto ICData = ICSolver->Solve(M, NOR, Params.Database, BinName);
-    auto DBData = makeDatabaseData(std::move(ICData), llvmDNA, oiDNA);
-    generateDatabase(std::move(DBData));
-  }
 }
 
 std::unique_ptr<RegionData> AOS::makeDatabaseData(std::unique_ptr<GADNA> ICData, 

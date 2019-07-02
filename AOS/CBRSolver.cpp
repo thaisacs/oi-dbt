@@ -4,11 +4,11 @@
 
 using namespace dbt;
 
-Data CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::string &oiDNA,
-    unsigned RegionID) {
+unsigned CBRSolver::findSimilar(AOSParams::mcStrategyType::ParamsType::DNAType DNA, const std::string &llvmDNA,
+    const std::string &oiDNA) {
   unsigned Index = 0;
-
-  switch(Params.DNA) {
+  
+  switch(DNA) {
     int Max;
     case AOSParams::mcStrategyType::ParamsType::DNAType::llvm:
       Max = SM->run(llvmDNA, DataSet[Index].llvmDNA);
@@ -31,10 +31,18 @@ Data CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::st
       }
       break;
   }
- 
+
+  return Index;
+}
+
+Data CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::string &oiDNA,
+    unsigned RegionID) {
+  
+  unsigned Index = findSimilar(Params.DNA, llvmDNA, oiDNA);
   unsigned BestIndex;
   Data D;   
   D.Fitness = 100000000000000;
+  
   for(unsigned i = 0; i < DataSet[Index].BESTs.size(); i++) {
     auto CM = llvm::CloneModule(*M); 
     auto OT = CA->getOptTime(CM.get(), DataSet[Index].BESTs[i].TAs);	
@@ -60,7 +68,13 @@ Data CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::st
   
   return D;
 }
-    
+ 
+void CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::string &oiDNA) {
+  unsigned Index = findSimilar(Params.DNA, llvmDNA, oiDNA);
+  auto IRO = llvm::make_unique<IROpt>();
+  IRO->optimizeIRFunction(M, DataSet[Index].BESTs[0].TAs);
+}
+
 void CBRSolver::loadDatabase(const std::string &Database) {
   for(const auto & entry : std::experimental::filesystem::directory_iterator(Database)) {
     RegionData RD;
@@ -73,7 +87,7 @@ void CBRSolver::loadDatabase(const std::string &Database) {
     }
 
     yin >> RD;
- 
+
     DataSet.push_back(RD);
   }
 }

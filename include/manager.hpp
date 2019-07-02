@@ -84,8 +84,6 @@ namespace dbt {
       bool ROIMode = false;
 
       ROIInfo ROI;
-
-      //std::vector<uint64_t> RegionTimes; 
       uint64_t RegionTimes; 
       unsigned RTT; 
 
@@ -133,6 +131,7 @@ namespace dbt {
 
       ~Manager() {
         // Alert threads to stop
+        std::cout << "deve acabar...\n";        
         isRunning = false;
         cv.notify_all();
 
@@ -148,6 +147,7 @@ namespace dbt {
           delete M.second;
         }
 
+        std::cout << "acabaei...\n";        
         delete NativeRegions;
       }
 
@@ -160,8 +160,8 @@ namespace dbt {
         OptMode = Custom;
       }
 
-      void setLockMode() {
-        LockMode = true;
+      void setLockMode(bool Value) {
+        LockMode = Value;
       }
 
       bool getLockMode() {

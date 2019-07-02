@@ -368,22 +368,16 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
   }
 }
 
-bool IROpt::optimizeIRFunction(llvm::Module *M, std::vector<uint16_t> Opts) {
+void IROpt::optimizeIRFunction(llvm::Module *M, std::vector<uint16_t> Opts) {
   auto FPM = std::make_unique<llvm::legacy::FunctionPassManager>(M);
   auto MPM = std::make_unique<llvm::legacy::PassManager>();
 
   populatePassManager(MPM.get(), FPM.get(), Opts);
-  try {
-    FPM->doInitialization();
+  FPM->doInitialization();
 
-    for (auto &F : *M) {
-      FPM->run(F);
-    }
-
-    MPM->run(*M);
-
-    return true;
-  }catch(int erro) {
-    return false;
+  for (auto &F : *M) {
+    FPM->run(F);
   }
+
+  MPM->run(*M);
 }

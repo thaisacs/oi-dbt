@@ -43,8 +43,6 @@ namespace dbt {
       memset(ExecFreq, 0, 1000000);
     };
 
-    ~RFT() {}
-
     void printRegions();
 
     void setHotnessThreshold (unsigned int threshold) { 

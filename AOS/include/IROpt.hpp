@@ -17,6 +17,6 @@ namespace dbt {
   public:
     IROpt() {}; 
 
-    bool optimizeIRFunction(llvm::Module*, std::vector<uint16_t>);
+    void optimizeIRFunction(llvm::Module*, std::vector<uint16_t>);
   };
 }

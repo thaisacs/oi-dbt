@@ -28,6 +28,7 @@ namespace dbt {
       CA = std::make_unique<CodeAnalyzer>();
     }
     virtual Data Solve(llvm::Module *M, const std::string&, const std::string&, unsigned) = 0;
+    virtual void Solve(llvm::Module *M, const std::string&, const std::string&) = 0;
     virtual void loadDatabase(const std::string&) = 0;
   };
 }

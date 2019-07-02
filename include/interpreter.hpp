@@ -39,7 +39,6 @@ namespace dbt {
     void setDecodedInst(uint32_t, OIDecoder::OIInst);
   public:
     ITDInterpreter(SyscallManager& SM, RFT& R) : Interpreter(SM), ImplRFT(R) {}
-
     void execute(Machine&, uint32_t, uint32_t);
   };
 }

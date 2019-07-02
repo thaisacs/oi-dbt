@@ -4,7 +4,9 @@ updateDatabase: true
 
 database: /home/thais/Dev/database/zdata4/ 
 
-optimization: dynamic # {static or dynamic}
+optimization: static # {static or dynamic}
+
+dumpData: false 
 
 # SECTION 1: Iterative Compilation
 
@@ -30,7 +32,8 @@ training: false
 # Machine learning strategy
 mcStrategy: CBR 
 mcStrategyParams:
-  DNA: llvm # {llvm or oi}
+  DNA: oi # {llvm or oi}
+  serialized: false 
   compileWeight: 0.1
   executionWeight: 0.9
 #  - (CBR) Case-based reasoning

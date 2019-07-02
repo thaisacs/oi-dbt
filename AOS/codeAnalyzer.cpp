@@ -32,11 +32,8 @@ uint64_t CodeAnalyzer::getExecutionTime(std::vector<uint16_t> Genes, unsigned Re
 
 uint64_t CodeAnalyzer::getOptTime(llvm::Module *M, std::vector<uint16_t> Genes) {
   uint64_t start = rdtscp();
-  bool Opt = IRO->optimizeIRFunction(M, Genes);
+  IRO->optimizeIRFunction(M, Genes);
   uint64_t end = rdtscp();
-
-  if(!Opt)
-    return 1000000000000000000;
 
   return end - start;
 }

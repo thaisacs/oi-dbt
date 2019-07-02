@@ -51,6 +51,16 @@ namespace dbt {
     bool isTraining() {
       return Params.Training;
     }
+
+    bool isStaticOpt() {
+      if(Params.Optimization == AOSParams::OptimizationType::STATIC)
+        return true;
+      return false;
+    }
+
+    bool isCBRSerialized() {
+      return Params.mcStrategy.Params.Serialized;
+    }
     private:
     void setBinName(const std::string&);
     void iterativeCompilation(llvm::Module*, OIInstList);

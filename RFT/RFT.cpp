@@ -42,8 +42,10 @@ bool dbt::RFT::finishRegionFormation() {
   if (OIRegion.size() != 0 && hasRecordedAddrs(RecordingEntry) && AlreadyCompiled.count(RecordingEntry) == 0) {
     Added = TheManager.addOIRegion(RecordingEntry, OIRegion);
     if (Added) {
-      std::unique_lock<std::mutex> lk(TheManager.BRFT);
-      TheManager.cvRFT.wait(lk, [&]{ return TheManager.isNativeRegionEntry(RecordingEntry); });
+      if(TheManager.getLockMode()) {
+        std::unique_lock<std::mutex> lk(TheManager.BRFT);
+        TheManager.cvRFT.wait(lk, [&]{ return TheManager.isNativeRegionEntry(RecordingEntry); });
+      }
       Total += OIRegion.size();
       AlreadyCompiled.insert(RecordingEntry);
     }

@@ -16,6 +16,8 @@
 clarg::argString RFTFlag("-rft", "Region Formation Technique (inet)", "netplus-e-r");
 clarg::argString AOSFlag("-aos", "Adaptive Optimization System file", "");
 clarg::argString ROIFlag("-roi", "Region of investigation", "");
+clarg::argBool LockFlag("-lock", "Activates lock mode");
+clarg::argBool NLockFlag("-nlock", "Activates lock mode");
 clarg::argInt    HotnessFlag("-hot", "Hotness threshold for the RFTs", 50);
 clarg::argString ReportFileFlag("-report", "Write down report to a file", "");
 clarg::argBool   InterpreterFlag("-interpret",  "Only interpret.");
@@ -73,6 +75,7 @@ int validateArguments() {
     cerr << "You must set the path of the aos file which will be usage!\n";
     return 1;
   }
+
   if (!BinaryFlag.was_set()) {
     cerr << "You must set the path of the binary which will be emulated!\n";
     return 1;
@@ -176,8 +179,11 @@ int main(int argc, char** argv) {
   dbt::AOS A(ROIFlag.was_set(), AOSFlag.get_value(), BinaryFlag.get_value(), ArgumentsFlag.get_value());
   dbt::Manager TheManager(M.getDataMemOffset(), M, A, VerboseFlag.was_set(), InlineFlag.was_set());
 
-  if(A.isTraining())
-    TheManager.setLockMode();
+  if(A.isTraining() && !A.isStaticOpt())
+    TheManager.setLockMode(true);
+
+  if(A.isCBRSerialized() && !A.isStaticOpt())
+    TheManager.setLockMode(true);
 
   if(ROIFlag.was_set()) {
     dbt::ROIInfo ROI;
@@ -211,7 +217,15 @@ int main(int argc, char** argv) {
 
     TheManager.setROI(ROI);
     TheManager.setROIMode();
-    TheManager.setLockMode();
+    TheManager.setLockMode(true);
+  }
+  
+  if (LockFlag.was_set()) {
+    TheManager.setLockMode(true);
+  }
+
+  if (NLockFlag.was_set()) {
+    TheManager.setLockMode(false);
   }
 
   if (LoadRegionsFlag.was_set() || LoadOIFlag.was_set() || WholeCompilationFlag.was_set())
@@ -306,7 +320,6 @@ int main(int argc, char** argv) {
 
   GlobalTimer.startClock();
   dbt::ITDInterpreter I(*SyscallM.get(), *RftChosen.get());
-  std::cerr << "Starting execution:\n";
 
   I.executeAll(M);
 
@@ -322,6 +335,6 @@ int main(int argc, char** argv) {
 
   signal(SIGSEGV, doNothingHandler);
   signal(SIGABRT, doNothingHandler);
-
-  return SyscallM->getExitStatus();
+  
+  exit(SyscallM->getExitStatus());
 }

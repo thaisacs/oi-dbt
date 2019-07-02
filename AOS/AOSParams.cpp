@@ -9,6 +9,7 @@ void MappingTraits<AOSParams>::mapping(IO &io, AOSParams &Params) {
   io.mapRequired("training", Params.Training);
   io.mapRequired("database", Params.Database);
   io.mapRequired("optimization", Params.Optimization);
+  io.mapRequired("dumpData", Params.DumpData);
   
   io.mapRequired("icStrategy", Params.icStrategy.Value);
 
@@ -52,6 +53,7 @@ void MappingTraits<AOSParams::GASolverParams>::mapping(IO &io,
 void MappingTraits<AOSParams::mcStrategyType::ParamsType>::mapping(IO &io, 
     AOSParams::mcStrategyType::ParamsType &Params) {
   io.mapRequired("DNA", Params.DNA);
+  io.mapRequired("serialized", Params.Serialized);
   io.mapRequired("compileWeight", Params.CompileWeight);
   io.mapRequired("executionWeight", Params.ExecutionWeight);
 }

@@ -23,6 +23,8 @@ namespace dbt {
       Params(Params), AOSMLSolver(S, BinPath, BinArgs, AOSPath) {
     }
     Data Solve(llvm::Module *M, const std::string&, const std::string&, unsigned) override;
+    void Solve(llvm::Module *M, const std::string&, const std::string&) override;
     void loadDatabase(const std::string&) override;
+    unsigned findSimilar(AOSParams::mcStrategyType::ParamsType::DNAType, const std::string&, const std::string&);
   };
 }
