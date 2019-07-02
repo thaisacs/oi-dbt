@@ -131,7 +131,6 @@ namespace dbt {
 
       ~Manager() {
         // Alert threads to stop
-        std::cout << "deve acabar...\n";        
         isRunning = false;
         cv.notify_all();
 
@@ -147,7 +146,6 @@ namespace dbt {
           delete M.second;
         }
 
-        std::cout << "acabaei...\n";        
         delete NativeRegions;
       }
 
