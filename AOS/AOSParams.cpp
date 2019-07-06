@@ -4,12 +4,14 @@ using namespace dbt;
 using namespace llvm::yaml;
 
 void MappingTraits<AOSParams>::mapping(IO &io, AOSParams &Params) {
-  io.mapRequired("updateDatabase", Params.UpdateDatabase);
+  //io.mapRequired("updateDatabase", Params.UpdateDatabase);
   io.mapRequired("createDatabase", Params.CreateDatabase);
   io.mapRequired("training", Params.Training);
   io.mapRequired("database", Params.Database);
-  io.mapRequired("optimization", Params.Optimization);
   io.mapRequired("dumpData", Params.DumpData);
+  
+  io.mapRequired("aplyBefore", Params.AplyBefore);
+  io.mapRequired("sequenceBefore", Params.SequenceBefore);
   
   io.mapRequired("icStrategy", Params.icStrategy.Value);
 
@@ -25,9 +27,9 @@ void MappingTraits<AOSParams>::mapping(IO &io, AOSParams &Params) {
   io.mapRequired("mcStrategyParams", Params.mcStrategy.Params);
 
   io.mapRequired("characterization", Params.CharacterizationParam);
-  io.mapRequired("retrieving", Params.RetrievingParam);
+  //io.mapRequired("retrieving", Params.RetrievingParam);
   io.mapRequired("similarity", Params.SimilarityParam);
-  io.mapRequired("invokeIC", Params.InvokeIC);
+  //io.mapRequired("invokeIC", Params.InvokeIC);
 }
 
 void ScalarEnumerationTraits<AOSParams::icStrategyType::ValueType>::enumeration(
@@ -46,8 +48,8 @@ void MappingTraits<AOSParams::GASolverParams>::mapping(IO &io,
   io.mapRequired("generations", Params.Generations);
   io.mapRequired("compileWeight", Params.CompileWeight);
   io.mapRequired("executionWeight", Params.ExecutionWeight);
-  io.mapRequired("diversityThreshold", Params.diversityThreshold);
-  io.mapRequired("convergenceThreshold", Params.convergenceThreshold);
+  //io.mapRequired("diversityThreshold", Params.diversityThreshold);
+  //io.mapRequired("convergenceThreshold", Params.convergenceThreshold);
 }
 
 void MappingTraits<AOSParams::mcStrategyType::ParamsType>::mapping(IO &io, 
@@ -94,23 +96,15 @@ void ScalarEnumerationTraits<AOSParams::CharacterizationType>::enumeration(
       AOSParams::CharacterizationType::FLL);
 }
 
-void ScalarEnumerationTraits<AOSParams::RetrievingType>::enumeration(
-    IO &io, AOSParams::RetrievingType& Param) {
-  io.enumCase(Param, "ELITE", 
-      AOSParams::RetrievingType::ELITE);
-  io.enumCase(Param, "JUST", 
-      AOSParams::RetrievingType::JUST);
-  io.enumCase(Param, "NEARLY", 
-      AOSParams::RetrievingType::NEARLY);
-}
-
-void ScalarEnumerationTraits<AOSParams::OptimizationType>::enumeration(
-    IO &io, AOSParams::OptimizationType& Param) {
-  io.enumCase(Param, "static", 
-      AOSParams::OptimizationType::STATIC);
-  io.enumCase(Param, "dynamic", 
-      AOSParams::OptimizationType::DYNAMIC);
-}
+//void ScalarEnumerationTraits<AOSParams::RetrievingType>::enumeration(
+//    IO &io, AOSParams::RetrievingType& Param) {
+//  io.enumCase(Param, "ELITE", 
+//      AOSParams::RetrievingType::ELITE);
+//  io.enumCase(Param, "JUST", 
+//      AOSParams::RetrievingType::JUST);
+//  io.enumCase(Param, "NEARLY", 
+//      AOSParams::RetrievingType::NEARLY);
+//}
 
 void ScalarEnumerationTraits<AOSParams::SimilarityType>::enumeration(
     IO &io, AOSParams::SimilarityType& Param) {

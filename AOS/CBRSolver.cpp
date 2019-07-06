@@ -80,7 +80,6 @@ void CBRSolver::loadDatabase(const std::string &Database) {
     RegionData RD;
     auto InputBuffer = llvm::MemoryBuffer::getFile((entry.path()).c_str());
     llvm::yaml::Input yin(InputBuffer->get()->getBuffer());
-
     for(unsigned i = 0; i < 10; i++) {
       Data D;
       RD.BESTs.push_back(D);

@@ -10,8 +10,9 @@ double dbt::MachineModel::runOnMachine(std::vector<uint16_t> Genes, unsigned Reg
     return 2;
   }
 
-  dbt::AOS A(true, AOSPath, BinPath, BinArgs);
-  dbt::Manager TheManager(TheMachine->getDataMemOffset(), *(TheMachine.get()), A, false, false);
+  std::shared_ptr<dbt::AOS> TheAOS = std::make_shared<dbt::AOS>(true, AOSPath, BinPath, BinArgs);
+  dbt::Manager TheManager(TheMachine->getDataMemOffset(), *(TheMachine.get()), TheAOS, false, false);
+  
   TheManager.setOptPolicy(dbt::Manager::OptPolitic::Normal);
   TheManager.startCompilationThr();
   std::unique_ptr<dbt::SyscallManager> SyscallM;
@@ -44,7 +45,6 @@ double dbt::MachineModel::runOnMachine(std::vector<uint16_t> Genes, unsigned Reg
   I.executeAll((*TheMachine.get()));
 
   GlobalTimer.stopClock();
-  //TheManager.dumpStats();
 
   std::cerr.flush();
   std::cout.flush();

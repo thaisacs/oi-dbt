@@ -46,6 +46,8 @@ AOS::AOS(bool ROIMode, const std::string &AOSPath, const std::string &BinPath, c
 
   if(!ROIMode && !Params.Training)
     MLSolver->loadDatabase(Params.Database);
+  else if(!ROIMode && Params.CreateDatabase && Params.Training)
+    system(("mkdir " + Params.Database).c_str());
 
   setBinName(BinPath);
   this->BinPath = BinPath;
@@ -56,42 +58,23 @@ AOS::AOS(bool ROIMode, const std::string &AOSPath, const std::string &BinPath, c
 void AOS::run(llvm::Module *M, OIInstList OIRegion) {
   NOR++;
   
-  if(Params.Optimization == AOSParams::OptimizationType::STATIC)
+  if(Params.AplyBefore)
     baseline(M);  
+  
+  if(Params.Training)
+    iterativeCompilation(M, OIRegion);
   else
-    if(Params.Training)
-      iterativeCompilation(M, OIRegion);
-    else
-      machineLearning(M, OIRegion);
+    machineLearning(M, OIRegion);
 }
 
 void AOS::baseline(llvm::Module *M) {
-  std::vector<uint16_t> TAs = {INSTCOMBINE, SIMPLIFYCFG, REASSOCIATE, _GVN, DIE, DCE, INSTCOMBINE, LICM, 
-        MEMCPYOPT, LOOP_UNSWITCH, INSTCOMBINE, INDVARS, LOOP_DELETION, LOOP_PREDICATION, LOOP_UNROLL,
-        SIMPLIFYCFG, INSTCOMBINE, LICM, _GVN};
- 
-  auto CA = std::make_unique<CodeAnalyzer>();
-  auto OT = CA->getOptTime(M, TAs);	
-  
-  if(Params.DumpData) {
-    auto CM = llvm::CloneModule(*M); 
-    auto CT = CA->getCompilationTime(std::move(CM));
-    auto ET = CA->getExecutionTime(TAs, NOR, BinPath, BinArgs, AOSPath);
-    CT += OT;
-
-    std::ofstream FileResult;
-    std::string HistName = BinName + std::to_string(NOR) + "Static.txt";
-    FileResult.open(HistName, std::ios::app);
-    FileResult << " - " << " CompilationTime: " << CT << 
-      " ExecutionTime: " << ET << std::endl;
-    FileResult.close();
-  }
+  auto IRO = llvm::make_unique<IROpt>();
+  IRO->optimizeIRFunction(M, Params.SequenceBefore);
 }
 
 void AOS::machineLearning(llvm::Module *M, OIInstList OIRegion) {
   std::string llvmDNA = CTZ->encode(M);
   std::string oiDNA = CTZ->encode(OIRegion);
-  
   
   if(Params.mcStrategy.Params.Serialized) {
     auto MLData = MLSolver->Solve(M, llvmDNA, oiDNA, NOR);
@@ -122,6 +105,10 @@ void AOS::iterativeCompilation(llvm::Module *M, OIInstList OIRegion) {
 
 void AOS::run(llvm::Module *M, ROIInfo R) {
   NOR++;
+  
+  if(Params.AplyBefore)
+    baseline(M);  
+  
   ICSolver->Solve(M, R, NOR);
 }
 

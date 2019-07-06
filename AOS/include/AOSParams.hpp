@@ -6,22 +6,22 @@
 
 namespace dbt {
   struct AOSParams {
-    bool UpdateDatabase;
+    //bool UpdateDatabase;
     bool CreateDatabase;
     std::string Database;
     bool Training;
     bool DumpData;
-
-    enum OptimizationType {
-      STATIC, DYNAMIC
-    } Optimization;
     
+    bool AplyBefore;
+    std::vector<uint16_t> SequenceBefore;
+
     struct SolverParams {
-      unsigned Max, Min, Times;
+      unsigned Max, Min;
+      unsigned Times;
 
       unsigned Generations;
-      double diversityThreshold;
-      unsigned convergenceThreshold;
+      //double diversityThreshold;
+      //unsigned convergenceThreshold;
       double MutationRate;
       double CompileWeight;
       double ExecutionWeight;
@@ -64,12 +64,12 @@ namespace dbt {
     enum SimilarityType {
       NaW, CMP
     } SimilarityParam;
+  
+    //enum RetrievingType {
+    //  ELITE, JUST, NEARLY
+    //} RetrievingParam;
 
-    enum RetrievingType {
-      ELITE, JUST, NEARLY
-    } RetrievingParam;
-
-    bool InvokeIC;
+    //bool InvokeIC;
   };
 }
 
@@ -107,14 +107,6 @@ template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrateg
 
 template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::CharacterizationType> {
   static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::CharacterizationType&);
-};
-
-template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::RetrievingType> {
-  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::RetrievingType&);
-};
-
-template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::OptimizationType> {
-  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::OptimizationType&);
 };
 
 template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::SimilarityType> {

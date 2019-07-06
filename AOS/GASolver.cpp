@@ -139,6 +139,9 @@ std::unique_ptr<GADNA> GASolver::Solve(llvm::Module* M, unsigned RegionID,
   CurrentPopulation->calculateProbability();
   CurrentPopulation->setBest();
   Evaluate(RegionID, Database, BinName);
+    
+  auto IRO = llvm::make_unique<IROpt>();
+  IRO->optimizeIRFunction(M, CurrentPopulation->getBestTAs());
 
   return std::move(CurrentPopulation->getBest());
 }

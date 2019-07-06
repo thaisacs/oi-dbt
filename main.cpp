@@ -17,7 +17,7 @@ clarg::argString RFTFlag("-rft", "Region Formation Technique (inet)", "netplus-e
 clarg::argString AOSFlag("-aos", "Adaptive Optimization System file", "");
 clarg::argString ROIFlag("-roi", "Region of investigation", "");
 clarg::argBool LockFlag("-lock", "Activates lock mode");
-clarg::argBool NLockFlag("-nlock", "Activates lock mode");
+clarg::argBool NLockFlag("-unlock", "Disables lock mode");
 clarg::argInt    HotnessFlag("-hot", "Hotness threshold for the RFTs", 50);
 clarg::argString ReportFileFlag("-report", "Write down report to a file", "");
 clarg::argBool   InterpreterFlag("-interpret",  "Only interpret.");
@@ -71,10 +71,10 @@ int validateArguments() {
     return 1;
   }
 
-  if (!AOSFlag.was_set()) {
-    cerr << "You must set the path of the aos file which will be usage!\n";
-    return 1;
-  }
+  //if (!AOSFlag.was_set()) {
+  //  cerr << "You must set the path of the aos file which will be usage!\n";
+  //  return 1;
+  //}
 
   if (!BinaryFlag.was_set()) {
     cerr << "You must set the path of the binary which will be emulated!\n";
@@ -175,101 +175,105 @@ int main(int argc, char** argv) {
     std::cerr << "Can't find or process ELF file " << argv[1] << std::endl;
     return 2;
   }
+  
+  std::unique_ptr<dbt::Manager> TheManager;
+  
+  if(!AOSFlag.was_set()) {
+    TheManager = std::make_unique<dbt::Manager>(M.getDataMemOffset(), M, nullptr, VerboseFlag.was_set(), InlineFlag.was_set());
+  }else {
+    std::shared_ptr<dbt::AOS> TheAOS;
+    TheAOS = std::make_shared<dbt::AOS>(ROIFlag.was_set(), AOSFlag.get_value(), BinaryFlag.get_value(), ArgumentsFlag.get_value());
+    TheManager = std::make_unique<dbt::Manager>(M.getDataMemOffset(), M, TheAOS, VerboseFlag.was_set(), InlineFlag.was_set());
+  
+    if(TheAOS->isTraining() || TheAOS->isCBRSerialized())
+      TheManager->setLockMode(true);
 
-  dbt::AOS A(ROIFlag.was_set(), AOSFlag.get_value(), BinaryFlag.get_value(), ArgumentsFlag.get_value());
-  dbt::Manager TheManager(M.getDataMemOffset(), M, A, VerboseFlag.was_set(), InlineFlag.was_set());
+    if(ROIFlag.was_set()) {
+      dbt::ROIInfo ROI;
 
-  if(A.isTraining() && !A.isStaticOpt())
-    TheManager.setLockMode(true);
+      std::string Info = ROIFlag.get_value();
 
-  if(A.isCBRSerialized() && !A.isStaticOpt())
-    TheManager.setLockMode(true);
+      unsigned i = 0, Buffer = 0;
+      char c = Info[i];
 
-  if(ROIFlag.was_set()) {
-    dbt::ROIInfo ROI;
+      ROI.RegionID = 0;
 
-    std::string Info = ROIFlag.get_value();
-
-    unsigned i = 0, Buffer = 0;
-    char c = Info[i];
-
-    ROI.RegionID = 0;
-
-    while(c != ':') {
-      ROI.RegionID = ROI.RegionID * 10 + c - 48;
-      c = Info[++i];
-    }
-
-    c = Info[++i];
-
-    while(i < Info.size()) {
-      if(c == '-') {
-        ROI.Opts.push_back(Buffer);
-        Buffer = 0;
+      while(c != ':') {
+        ROI.RegionID = ROI.RegionID * 10 + c - 48;
         c = Info[++i];
       }
 
-      Buffer = Buffer * 10 + c - 48;
       c = Info[++i];
+
+      while(i < Info.size()) {
+        if(c == '-') {
+          ROI.Opts.push_back(Buffer);
+          Buffer = 0;
+          c = Info[++i];
+        }
+
+        Buffer = Buffer * 10 + c - 48;
+        c = Info[++i];
+      }
+
+      ROI.Opts.push_back(Buffer);
+
+      TheManager->setROI(ROI);
+      TheManager->setROIMode();
+      TheManager->setLockMode(true);
     }
-
-    ROI.Opts.push_back(Buffer);
-
-    TheManager.setROI(ROI);
-    TheManager.setROIMode();
-    TheManager.setLockMode(true);
   }
   
   if (LockFlag.was_set()) {
-    TheManager.setLockMode(true);
+    TheManager->setLockMode(true);
   }
 
   if (NLockFlag.was_set()) {
-    TheManager.setLockMode(false);
+    TheManager->setLockMode(false);
   }
-
+  
   if (LoadRegionsFlag.was_set() || LoadOIFlag.was_set() || WholeCompilationFlag.was_set())
-    TheManager.setToLoadRegions(RegionPath.get_value(), (!LoadOIFlag.was_set() && !WholeCompilationFlag.was_set()), WholeCompilationFlag.was_set());
+    TheManager->setToLoadRegions(RegionPath.get_value(), (!LoadOIFlag.was_set() && !WholeCompilationFlag.was_set()), WholeCompilationFlag.was_set());
 
   if (CustomOptsFlag.was_set()) {
-    TheManager.setOptPolicy(dbt::Manager::OptPolitic::Custom);
-    TheManager.setCustomOpts(loadCustomOpts(CustomOptsFlag.get_value()));
+    TheManager->setOptPolicy(dbt::Manager::OptPolitic::Custom);
+    TheManager->setCustomOpts(loadCustomOpts(CustomOptsFlag.get_value()));
   } else {
-    TheManager.setOptPolicy(dbt::Manager::OptPolitic::Normal);
+    TheManager->setOptPolicy(dbt::Manager::OptPolitic::Normal);
   }
 
-  TheManager.startCompilationThr();
+  TheManager->startCompilationThr();
 
   if (InterpreterFlag.was_set()) {
-    RftChosen = std::make_unique<dbt::NullRFT>(TheManager);
+    RftChosen = std::make_unique<dbt::NullRFT>(*TheManager.get());
   } else {
     std::string RFTName = RFTFlag.get_value();
     transform(RFTName.begin(), RFTName.end(), RFTName.begin(), ::tolower);
 
     if (LoadRegionsFlag.was_set() || LoadOIFlag.was_set() || WholeCompilationFlag.was_set()) {
       std::cerr << "Preheated RFT Selected\n";
-      RftChosen = std::make_unique<dbt::PreheatRFT>(TheManager);
+      RftChosen = std::make_unique<dbt::PreheatRFT>(*TheManager.get());
     } else if (RFTName == "net") {
       std::cerr << "NET RFT Selected\n";
-      RftChosen = std::make_unique<dbt::NET>(TheManager);
+      RftChosen = std::make_unique<dbt::NET>(*TheManager.get());
     } else if (RFTName == "net-r") {
       std::cerr << "NET-R RFT Selected\n";
-      RftChosen = std::make_unique<dbt::NET>(TheManager, true);
+      RftChosen = std::make_unique<dbt::NET>(*TheManager.get(), true);
     } else if (RFTName == "mret2") {
       std::cerr << "MRET2 RFT Selected\n";
-      RftChosen = std::make_unique<dbt::MRET2>(TheManager);
+      RftChosen = std::make_unique<dbt::MRET2>(*TheManager.get());
     } else if (RFTName == "netplus") {
       std::cerr << "NETPlus RFT Selected\n";
-      RftChosen = std::make_unique<dbt::NETPlus>(TheManager);
+      RftChosen = std::make_unique<dbt::NETPlus>(*TheManager.get());
     } else if (RFTName == "netplus-c") {
       std::cerr << "NETPlus-c RFT Selected\n";
-      RftChosen = std::make_unique<dbt::NETPlus>(TheManager, false, true);
+      RftChosen = std::make_unique<dbt::NETPlus>(*TheManager.get(), false, true);
     } else if (RFTName == "netplus-e-r") {
       std::cerr << "NETPlus-e-r RFT Selected\n";
-      RftChosen = std::make_unique<dbt::NETPlus>(TheManager, true);
+      RftChosen = std::make_unique<dbt::NETPlus>(*TheManager.get(), true);
     } else if (RFTName == "netplus-e-r-c") {
       std::cerr << "NETPlus-e-r-c RFT Selected\n";
-      RftChosen = std::make_unique<dbt::NETPlus>(TheManager, true, true);
+      RftChosen = std::make_unique<dbt::NETPlus>(*TheManager.get(), true, true);
     } else {
       std::cerr << "You should select a valid RFT!\n";
       return 1;
@@ -308,10 +312,10 @@ int main(int argc, char** argv) {
     M.reset();
     std::cerr << "done\n";
 
-    RftChosen = std::make_unique<dbt::PreheatRFT>(TheManager);
+    RftChosen = std::make_unique<dbt::PreheatRFT>(*TheManager.get());
     GlobalTimer.printReport("Preheat");
 
-    while (TheManager.getNumOfOIRegions() != 0) {}
+    while (TheManager->getNumOfOIRegions() != 0) {}
     M.setPreheating(false);
   }
 
@@ -324,10 +328,10 @@ int main(int argc, char** argv) {
   I.executeAll(M);
 
   if (DumpRegionsFlag.was_set() || DumpOIRegionsFlag.was_set())
-    TheManager.dumpRegions(MergeOIFlag.was_set(), DumpOIRegionsFlag.was_set());
+    TheManager->dumpRegions(MergeOIFlag.was_set(), DumpOIRegionsFlag.was_set());
 
   GlobalTimer.stopClock();
-  TheManager.dumpStats();
+  TheManager->dumpStats();
   GlobalTimer.printReport("Global");
 
   std::cerr.flush();

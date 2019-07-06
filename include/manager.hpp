@@ -38,8 +38,8 @@ namespace dbt {
     private:
       llvm::LLVMContext TheContext;
       dbt::Machine& TheMachine;
-      dbt::AOS& TheAOS;
-      
+      std::shared_ptr<dbt::AOS> TheAOS;
+
       std::string RegionPath;
 
       std::vector<uint32_t> OIRegionsKey;
@@ -107,10 +107,12 @@ namespace dbt {
       std::condition_variable cvRFT;
       std::atomic<bool> isCompiling;
 
-      Manager(uint32_t DMO, dbt::Machine& M, dbt::AOS& A, bool VO = false, bool Inline = false) : DataMemOffset(DMO), isRunning(true),
-      isFinished(false), VerboseOutput(VO), TheMachine(M), TheAOS(A), NumOfOIRegions(0), IsToInline(Inline), RegionTimes(0), RTT(0) {
+      Manager(uint32_t DMO, dbt::Machine& M, std::shared_ptr<dbt::AOS> TheAOS, bool VO = false, bool Inline = false) : DataMemOffset(DMO), isRunning(true),
+      isFinished(false), VerboseOutput(VO), TheMachine(M), TheAOS(TheAOS), NumOfOIRegions(0), IsToInline(Inline), RegionTimes(0), RTT(0) {
         NativeRegions = new uint64_t[NATIVE_REGION_SIZE];
         memset((void*) NativeRegions, 0, sizeof(NativeRegions));
+
+
       }
 
       void startCompilationThr() {

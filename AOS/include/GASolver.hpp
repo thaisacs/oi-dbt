@@ -30,6 +30,7 @@ namespace dbt {
     unsigned pickOne();
     void setBest();
     std::unique_ptr<GADNA> getBest() { return std::move(Best); }
+    std::vector<uint16_t> getBestTAs() { return Best->getGenes(); }
     unsigned getConvergenceCount() { return convergenceCount; }
     void calculateProbability(); 
     double calculateDiversity();

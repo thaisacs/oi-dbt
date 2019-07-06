@@ -47,7 +47,7 @@ uint16_t DNA::getLocus(unsigned Index) {
 }
 
 std::vector<uint16_t> DNA::getGenes() {
-  return std::move(Genes);
+  return Genes;
 }
 
 double DNA::getFitness() {

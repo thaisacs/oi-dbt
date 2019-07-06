@@ -94,6 +94,7 @@ void Manager::runPipeline() {
   PerfMapFile = new std::ofstream("/tmp/perf-"+std::to_string(getpid())+".map");
 
   IRE = llvm::make_unique<IREmitter>();
+  IRO = llvm::make_unique<IROpt>();
 
   while (isRunning) {
     uint32_t EntryAddress;
@@ -159,11 +160,18 @@ void Manager::runPipeline() {
       for (auto& F : *Module)
         for (auto& BB : F)
           Size += BB.size();
-
-      if(ROIMode)
-        TheAOS.run(Module, ROI);
-      else
-        TheAOS.run(Module, OIRegion);
+      
+      if(!TheAOS) {
+        if(OptMode != OptPolitic::Custom)
+          IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress);
+        else if(CustomOpts->count(EntryAddress) != 0)
+          IRO->customOptimizeIRFunction(Module, (*CustomOpts)[EntryAddress]);
+      }else {
+        if(ROIMode)
+          TheAOS->run(Module, ROI);
+        else
+          TheAOS->run(Module, OIRegion);
+      }
 
       if (VerboseOutput)
         Module->print(llvm::errs(), nullptr);

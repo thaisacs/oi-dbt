@@ -12,11 +12,21 @@
 
 namespace dbt {
   class IROpt {
-    void populatePassManager(llvm::legacy::PassManager*, 
-        llvm::legacy::FunctionPassManager*, std::vector<uint16_t>);
+    std::unique_ptr<llvm::legacy::FunctionPassManager> BasicPM;
+    
+    void populatePassManager(llvm::legacy::PassManager*, llvm::legacy::FunctionPassManager*, std::vector<uint16_t>);
+    void populateFuncPassManager(llvm::legacy::FunctionPassManager*, std::vector<std::string>);
+
   public:
     IROpt() {}; 
 
+    enum OptLevel { Basic, Soft, Medium, Hard, Custom };
+    
+    // oi-dbt default
+    void optimizeIRFunction(llvm::Module*, OptLevel, uint32_t);
+    void customOptimizeIRFunction(llvm::Module*, std::vector<std::string>);
+
+    // aos
     void optimizeIRFunction(llvm::Module*, std::vector<uint16_t>);
   };
 }

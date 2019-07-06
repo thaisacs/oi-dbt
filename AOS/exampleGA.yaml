@@ -1,36 +1,37 @@
 # AOS Configuration File
 
-updateDatabase: true
+#updateDatabase: true
 
 database: /home/thais/Dev/database/zdata4/ 
 
-optimization: static # {static or dynamic}
-
-dumpData: false 
+dumpData: false # ativa e desativa a coleta de dados do CBR serializado; 
 
 # SECTION 1: Iterative Compilation
 
-icStrategy: GA 
+icStrategy: GA # a única opção implementada eh o GA;
 icStrategyParams:
   populationSize: 20 
   generations: 20
   mutationRate: 0.016
-  compileWeight: 0.1
-  executionWeight: 0.9
-  diversityThreshold: 0.01
-  convergenceThreshold: 3
-  times: 1
-  max: 25
-  min: 10
+  compileWeight: 0.1 # peso dado para o tempo de compilação na hora de calcular o fitness;
+  executionWeight: 0.9 # peso dado para o tempo de execução na hora de calcular o fitness;
+  #  diversityThreshold: 0.01
+  #  convergenceThreshold: 3
+  times: 1 # desativado;
+  max: 25 # indivíduos aleatórios da população inicial teram no máximo essa quantidade de transformações;
+  min: 10 # indivíduos aleatórios da população inicial teram no mínimo essa quantidade de transformações;
 
-createDatabase: false 
+createDatabase: false # cria um diretório com o nome fornecido no parâmetro database;
 
-training: false
+training: false # ativa o algoritmo escolhido em icStrategy com os parâmetros em icStrategyParams;
+
+aplyBefore: true # aplica a sequenceBefore antes de aplicar o GA ou o CBR;
+sequenceBefore: [3, 10, 60]
 
 # SECTION 2: Machine Learning
 
 # Machine learning strategy
-mcStrategy: CBR 
+mcStrategy: CBR # a única opção implementada eh o CBR; 
 mcStrategyParams:
   DNA: oi # {llvm or oi}
   serialized: false 
@@ -41,18 +42,118 @@ mcStrategyParams:
 #  - (RFL) Reinforcement learning
 #  - (LTL) Long-term learning
  
-characterization: DNA
+characterization: DNA # a única opção implementada eh o DNA;
 #  - (DNA) DNA-based approach (only the OpenISA instructions)
 #  - (DND) DNA-based approach (OpenISA instructions + data type) ????
 #  - (FLL) The complete region
 #
-similarity: NaW
+similarity: NaW # a úunica opção implementada eh o NaW;
 #  - (NaW) Needleman-Wunsch algoritm
 #  - (CMP) Compress
 
-retrieving: JUST
-#  - ELITE
-#  - JUST
-#  - NEARLY
-
-invokeIC: false
+#  Funcionamento do GA
+#
+#  A população inicial é composta pelos 10 conjuntos do best10 e populationSize - 10 indívíduos aleatórios;
+#  Os índíviduos aleatórios possuem entre min e max (parêmetros) transformações;
+#  A cada geração o melhor indivíduo sobrevive na população (eletismo);
+#  Os outros populationSize - 1 indivíduos são gerados através do cruzamento;
+#  No cruzamento dois pais são selecionados através do método roleta;
+#  Cada cruzamento de dois pais gera dois filhos;
+#  Cada filho possui metade das transformações de cada um dos pais;
+#  O primeiro filho possui a primeira metade do primeiro pai e a segunda metade do segundo pai;
+#  O segundo filho possui a segunda metade do primeiro pai e a primeira metade do segundo pai;
+#  Após os cruzamentos, os novos indivíduos são passados pelo operador de mutação:
+#  O operador de mutação passa em cada locus; cada locus pode ser mutado com probabilidade mutationRate (parâmetro);
+#  Caso o locus seja mutado, é gerado uma transformação aleatória para o locus em questão.
+#  O algoritmo para quando atingir generations (parâmetro) gerações; 
+#
+#  Esse método gera para cada região investigada dois arquivos:
+#     .yaml: com o dna da reigão em llvm e oi; também possui um vetor de TAs com a melhor sequência 
+#     encontrada ao longo das gerações; Um exemplo seria:
+#
+#       llvmDNA:         gggggkefgkefgkefAkefkefkefkefkeA
+#       oiDNA:           axaxaxax
+#       BESTs:           
+#        - TAs:          [10, 44, 85, 100, 50, 0, 0, 77, 0]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#     
+#     .txt: possui todas as gerações indicando os indivíduos de cada população e qual foi o 
+#     melhor indivíduo encontrado até a população atual;
+#
+#  Funcionamento do CBR
+#
+#  Possui duas versões implementadas: serializada e não serializada;
+#  Com serialized: true, a versão serializada é executada;
+#  Com serialized: false, a versão não serializada é executada;
+#  Ambas utilizam como medida de similaridade o NaW;
+#  A media de similaridade é aplicada ao dna oi ou dna llvm; Depende do parâmetro DNA do mcStrategyParams;
+#  Carrega em memória a base que deve ter o formato:
+#
+#       llvmDNA:         gggggkefgkefgkefAkefkefkefkefkeA
+#       oiDNA:           axaxaxax
+#       BESTs:           
+#        - TAs:          [...]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#        - TAs:          [...]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#        - TAs:          [...]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#        - TAs:          [...]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#        - TAs:          [...]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#        - TAs:          [...]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#        - TAs:          [...]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#        - TAs:          [...]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#        - TAs:          [...]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#        - TAs:          [...]
+#          CompilationTime: 15421247
+#          ExecutionTime:   3405
+#          Fitness:         1545189
+#
+#  Serializada: serve para investigar e analisar cada região;
+#  Essa versão, para cada região formada, vai até a base e seleciona qual região da base possui maior 
+#  semelhança com a região atual;
+#  Após selecionada a região da base, o método avalia qual das 10 TAs da região selecionada otimiza mais a região atual;
+#  Para avalizar qual é melhor, calcula-se o fitness de cada TAs considerando os parâmetros: compileWeight e executionWeight;
+#  Com dumpData: true, essa versão gera um .txt com qual a sequência que obteve melhor fitness;
+#
+#  Não Serializada: serve para investigar e analisar o tempo do programa inteiro;
+#  Essa versão, para cada região formada, vai até a base e seleciona qual região da base possui maior 
+#  semelhança com a região atual;
+#  Após selecionada a região da base, o método otimiza a região investigada com a melhor TAs da região selecionada;
+#
+#  Calculando o tempo de compilação
+#
+#  O tempo de compilação de uma região é o tempo de aplicar a sequência de otimização na região + tempo de gerar o binário e linkar;
+#
+#  Calculando o tempo de execução
+#
+#  O tempo de execução é calculado pelo método runOnMachine da classe machineModel;
+#  Essa função simula o oi-dbt otimizando apenas a região de interesse;
+#  Todas vez que a região de interesse é executada o tempo de execução eh coletado;
+#  No final da execução realiza-se a média dos tempos coletados;
