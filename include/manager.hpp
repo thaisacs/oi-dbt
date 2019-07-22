@@ -1,3 +1,7 @@
+#define OIInstList std::vector<std::array<uint32_t,2>>
+#define NATIVE_REGION_SIZE 100000000
+
+
 #ifndef MANAGER_HPP
 #define MANAGER_HPP
 
@@ -21,9 +25,6 @@
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Bitcode/BitcodeWriter.h"
 
-#define OIInstList std::vector<std::array<uint32_t,2>>
-#define NATIVE_REGION_SIZE 100000000
-
 namespace dbt {
   struct ROIInfo {
     unsigned RegionID;
@@ -31,6 +32,7 @@ namespace dbt {
   };
   class IREmitter;
   class Machine;
+
   class Manager {
     public:
       enum OptPolitic { None, Normal, Aggressive, Custom };
@@ -61,6 +63,8 @@ namespace dbt {
       std::vector<OIInstList> OIFuncs;
       std::vector<std::vector<uint32_t>> OIFuncsEntries;
       uint32_t NumFuncs = 0;
+
+      uint32_t ExecCount = 0;
 
       uint32_t DataMemOffset;
 
@@ -107,12 +111,11 @@ namespace dbt {
       std::condition_variable cvRFT;
       std::atomic<bool> isCompiling;
 
-      Manager(uint32_t DMO, dbt::Machine& M, std::shared_ptr<dbt::AOS> TheAOS, bool VO = false, bool Inline = false) : DataMemOffset(DMO), isRunning(true),
-      isFinished(false), VerboseOutput(VO), TheMachine(M), TheAOS(TheAOS), NumOfOIRegions(0), IsToInline(Inline), RegionTimes(0), RTT(0) {
+      Manager(dbt::Machine& M, std::shared_ptr<dbt::AOS> TheAOS, bool VO = false, bool Inline = false) : isRunning(true), isFinished(false), 
+          VerboseOutput(VO), TheMachine(M), TheAOS(TheAOS), NumOfOIRegions(0), IsToInline(Inline), RegionTimes(0), RTT(0) {
+        
         NativeRegions = new uint64_t[NATIVE_REGION_SIZE];
         memset((void*) NativeRegions, 0, sizeof(NativeRegions));
-
-
       }
 
       void startCompilationThr() {
@@ -149,6 +152,10 @@ namespace dbt {
         }
 
         delete NativeRegions;
+      }
+
+      void setDataMemOffset(uint32_t DMO) {
+        DataMemOffset = DMO;
       }
 
       void setOptPolicy(OptPolitic OM) {
@@ -215,6 +222,10 @@ namespace dbt {
         return AvgOptCodeSize;
       }
 
+      void incExecCount() {
+        ++ExecCount;
+      }
+
       void setToLoadRegions(std::string path, bool InLLVMFormat = true, bool WholeCompilation = false) {
         IsToLoadRegions = true;
         IsToDoWholeCompilation = WholeCompilation;
@@ -277,6 +288,8 @@ namespace dbt {
       void loadOIRegionsFromFiles();
 
       void mergeOIRegions();
+
+      void reset();
 
       void dumpRegions(bool MergeRegions = false, bool OnlyOI = false) {
         while (getNumOfOIRegions() != 0) {}

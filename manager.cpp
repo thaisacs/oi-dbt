@@ -161,10 +161,16 @@ void Manager::runPipeline() {
         for (auto& BB : F)
           Size += BB.size();
       
+      // if (!isRunning) return;
+      
       if(!TheAOS) {
-        if(OptMode != OptPolitic::Custom)
-          IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress);
-        else if(CustomOpts->count(EntryAddress) != 0)
+        //if(OptMode != OptPolitic::Custom)
+        //  IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress);
+        //else if(CustomOpts->count(EntryAddress) != 0)
+        //  IRO->customOptimizeIRFunction(Module, (*CustomOpts)[EntryAddress]);
+        if (OptMode != OptPolitic::Custom)
+          IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress, 1, TheMachine.getBinPath());
+        else if (CustomOpts->count(EntryAddress) != 0)
           IRO->customOptimizeIRFunction(Module, (*CustomOpts)[EntryAddress]);
       }else {
         if(ROIMode)
@@ -172,6 +178,8 @@ void Manager::runPipeline() {
         else
           TheAOS->run(Module, OIRegion);
       }
+
+
 
       if (VerboseOutput)
         Module->print(llvm::errs(), nullptr);
@@ -257,10 +265,10 @@ void Manager::runPipeline() {
     if(LockMode)
       cvRFT.notify_all();
 
-		if (IsToDoWholeCompilation) {
-			isFinished = true;
-			return;
-		}
+    if (IsToDoWholeCompilation) {
+	    isFinished = true;
+		return;
+	}
   }
   PerfMapFile->close();
   isFinished = true;
@@ -298,4 +306,19 @@ int32_t Manager::jumpToRegion(uint32_t EntryAddress) {
   }
 
   return JumpTo;
+}
+
+void Manager::reset() {  
+    while (NumOfOIRegions != 0); 
+
+    OIRegionsKey.clear();
+    OIRegions.clear();
+    CompiledOIRegions.clear();
+    TouchedEntries.clear();
+    NumOfOIRegions = 0;
+    for (auto P : IRRegions)
+        delete P.second;
+    IRRegions.clear();
+    for (unsigned I = 0; I < NATIVE_REGION_SIZE; I++)
+       NativeRegions[I] = 0; 
 }

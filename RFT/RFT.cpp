@@ -74,3 +74,8 @@ void dbt::RFT::printRegions() {
   }
   std::cout << "\n";
 }
+
+bool dbt::RFT::isAllowedInstToStart(unsigned Addr, Machine& M) {
+    auto I = OIDecoder::decode(M.getInstAt(Addr).asI_);
+    return !(I.Type == Syscall || I.Type == Ijmp || I.Type == Callr);
+}

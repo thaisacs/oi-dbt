@@ -11,7 +11,8 @@ double dbt::MachineModel::runOnMachine(std::vector<uint16_t> Genes, unsigned Reg
   }
 
   std::shared_ptr<dbt::AOS> TheAOS = std::make_shared<dbt::AOS>(true, AOSPath, BinPath, BinArgs);
-  dbt::Manager TheManager(TheMachine->getDataMemOffset(), *(TheMachine.get()), TheAOS, false, false);
+  dbt::Manager TheManager(*(TheMachine.get()), TheAOS, false, false);
+  TheManager.setDataMemOffset(TheMachine->getDataMemOffset());
   
   TheManager.setOptPolicy(dbt::Manager::OptPolitic::Normal);
   TheManager.startCompilationThr();

@@ -21,8 +21,8 @@ namespace dbt {
   protected:
     std::set<uint32_t> AlreadyCompiled;
     unsigned HotnessThreshold = 128;
-    uint8_t ExecFreq[1000000];
-    bool isEntry[1000000];
+    uint8_t ExecFreq[NATIVE_REGION_SIZE];
+    bool isEntry[NATIVE_REGION_SIZE];
     OIInstList OIRegion;
 
     bool Recording = false;
@@ -38,6 +38,7 @@ namespace dbt {
     void insertInstruction(uint32_t, uint32_t);
     void insertInstruction(std::array<uint32_t, 2>&);
     bool hasRecordedAddrs(uint32_t);
+    bool isAllowedInstToStart(unsigned, Machine&);
   public:
     RFT(Manager& M) : TheManager(M) {
       memset(ExecFreq, 0, 1000000);
@@ -53,6 +54,16 @@ namespace dbt {
     };
 
     virtual void onBranch(dbt::Machine&) = 0;
+
+    void reset() {
+        for (unsigned I = 0; I < NATIVE_REGION_SIZE; I++) {
+            ExecFreq[I] = 0;
+            isEntry[I] = 0;
+        }
+        AlreadyCompiled.clear();
+        Recording = false;
+        OIRegion.clear();
+    }
   };
 
   class NET : public RFT {

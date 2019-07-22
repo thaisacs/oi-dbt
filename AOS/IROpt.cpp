@@ -436,7 +436,8 @@ void IROpt::optimizeIRFunction(llvm::Module *M, std::vector<uint16_t> Opts) {
   MPM->run(*M);
 }
 
-void dbt::IROpt::optimizeIRFunction(llvm::Module *M, OptLevel Level, uint32_t EntryAddress) {
+void dbt::IROpt::optimizeIRFunction(llvm::Module *M, OptLevel Level, uint32_t EntryAddress, uint32_t ExecNumber, 
+                                std::string BinPath) {
   // Lazy initialization
   if (Level == OptLevel::Basic) {
     if (!BasicPM) {

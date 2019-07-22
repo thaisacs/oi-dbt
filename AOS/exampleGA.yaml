@@ -2,7 +2,7 @@
 
 #updateDatabase: true
 
-database: /home/thais/Dev/database/zdata4/ 
+database: zdata1/ 
 
 dumpData: false # ativa e desativa a coleta de dados do CBR serializado; 
 
@@ -21,11 +21,11 @@ icStrategyParams:
   max: 25 # indivíduos aleatórios da população inicial teram no máximo essa quantidade de transformações;
   min: 10 # indivíduos aleatórios da população inicial teram no mínimo essa quantidade de transformações;
 
-createDatabase: false # cria um diretório com o nome fornecido no parâmetro database;
+createDatabase: true # cria um diretório com o nome fornecido no parâmetro database;
 
-training: false # ativa o algoritmo escolhido em icStrategy com os parâmetros em icStrategyParams;
+training: true # ativa o algoritmo escolhido em icStrategy com os parâmetros em icStrategyParams;
 
-aplyBefore: true # aplica a sequenceBefore antes de aplicar o GA ou o CBR;
+aplyBefore: false # aplica a sequenceBefore antes de aplicar o GA ou o CBR;
 sequenceBefore: [3, 10, 60]
 
 # SECTION 2: Machine Learning
