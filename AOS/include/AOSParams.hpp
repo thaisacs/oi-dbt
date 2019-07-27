@@ -9,25 +9,22 @@ namespace dbt {
     //bool UpdateDatabase;
     bool CreateDatabase;
     std::string Database;
-    bool Training;
-    bool DumpData;
     
-    bool AplyBefore;
+    enum StrategyType {
+      IC, ML
+    } Strategy;
+    
     std::vector<uint16_t> SequenceBefore;
 
     struct SolverParams {
       unsigned Max, Min;
-      unsigned Times;
-
       unsigned Generations;
-      //double diversityThreshold;
-      //unsigned convergenceThreshold;
-      double MutationRate;
       double CompileWeight;
       double ExecutionWeight;
     };
 
     struct GASolverParams : public SolverParams {
+      double MutationRate;
       unsigned PopulationSize;
     };
 
@@ -48,28 +45,22 @@ namespace dbt {
         CBR, DPL, RFL, LTL
       } Value;
       struct ParamsType {
-        enum DNAType {
+        enum DNATypes {
           llvm, oi
-        } DNA;
+        } DNAType;
         bool Serialized;
         double CompileWeight;
         double ExecutionWeight;
+        bool DumpData;
+        unsigned DatabaseTAs;
+        enum SimilarityType {
+          NaW, CMP
+        } SimilarityParam;
+        enum CharacterizationType {
+          DNA, DND, FLL
+        } CharacterizationParam;
       } Params;
     } mcStrategy;
-
-    enum CharacterizationType {
-      DNA, DND, FLL
-    } CharacterizationParam;
-
-    enum SimilarityType {
-      NaW, CMP
-    } SimilarityParam;
-  
-    //enum RetrievingType {
-    //  ELITE, JUST, NEARLY
-    //} RetrievingParam;
-
-    //bool InvokeIC;
   };
 }
 
@@ -101,14 +92,19 @@ struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::Value
       dbt::AOSParams::mcStrategyType::ValueType&);
 };
 
-template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::ParamsType::DNAType> {
-  static void enumeration(llvm::yaml::IO &, dbt::AOSParams::mcStrategyType::ParamsType::DNAType&);
+template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::ParamsType::DNATypes> {
+  static void enumeration(llvm::yaml::IO &, dbt::AOSParams::mcStrategyType::ParamsType::DNATypes&);
 };
 
-template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::CharacterizationType> {
-  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::CharacterizationType&);
+template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::ParamsType::CharacterizationType> {
+  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::mcStrategyType::ParamsType::CharacterizationType&);
 };
 
-template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::SimilarityType> {
-  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::SimilarityType&);
+template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::ParamsType::SimilarityType> {
+  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::mcStrategyType::ParamsType::SimilarityType&);
 };
+
+template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::StrategyType> {
+  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::StrategyType&);
+};
+

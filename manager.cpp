@@ -162,24 +162,39 @@ void Manager::runPipeline() {
           Size += BB.size();
       
       // if (!isRunning) return;
-      
+
       if(!TheAOS) {
-        //if(OptMode != OptPolitic::Custom)
+        //if (OptMode != OptPolitic::Custom)
         //  IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress);
-        //else if(CustomOpts->count(EntryAddress) != 0)
+        //else if (CustomOpts->count(EntryAddress) != 0)
         //  IRO->customOptimizeIRFunction(Module, (*CustomOpts)[EntryAddress]);
-        if (OptMode != OptPolitic::Custom)
-          IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress, 1, TheMachine.getBinPath());
-        else if (CustomOpts->count(EntryAddress) != 0)
-          IRO->customOptimizeIRFunction(Module, (*CustomOpts)[EntryAddress]);
+        switch (OptMode) {
+          case OptPolitic::None:
+            IRO->optimizeIRFunction(Module, IROpt::OptLevel::None, EntryAddress);
+            break;
+          case OptPolitic::Basic:
+            IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress);
+            break;
+          case OptPolitic::Normal:
+            IRO->optimizeIRFunction(Module, IROpt::OptLevel::Normal, EntryAddress);
+            break;
+          case OptPolitic::Aggressive:
+            IRO->optimizeIRFunction(Module, IROpt::OptLevel::Aggressive, EntryAddress);
+            break;
+          case OptPolitic::Custom:
+            if(CustomOpts->count(EntryAddress) != 0)
+              IRO->customOptimizeIRFunction(Module, (*CustomOpts)[EntryAddress]);
+            break;
+          default:
+            std::cout << "OptMode not found!!!";
+            exit(1);
+        }
       }else {
         if(ROIMode)
           TheAOS->run(Module, ROI);
         else
           TheAOS->run(Module, OIRegion);
       }
-
-
 
       if (VerboseOutput)
         Module->print(llvm::errs(), nullptr);
@@ -252,8 +267,8 @@ void Manager::runPipeline() {
         std::cerr << buffer.str().c_str() << std::endl;
       }
     } else if (VerboseOutput) {
-        std::cerr << "Giving up " << std::hex << EntryAddress << " compilation as it starts with a return!\n";
-				delete Module;
+      std::cerr << "Giving up " << std::hex << EntryAddress << " compilation as it starts with a return!\n";
+      delete Module;
     }
 
     OIRegionsMtx.lock();
@@ -261,14 +276,14 @@ void Manager::runPipeline() {
     NumOfOIRegions -= 1;
     OIRegionsKey.erase(OIRegionsKey.begin());
     OIRegionsMtx.unlock();
-    
+
     if(LockMode)
       cvRFT.notify_all();
 
     if (IsToDoWholeCompilation) {
-	    isFinished = true;
-		return;
-	}
+      isFinished = true;
+      return;
+    }
   }
   PerfMapFile->close();
   isFinished = true;
@@ -292,7 +307,7 @@ int32_t Manager::jumpToRegion(uint32_t EntryAddress) {
   int32_t* RegPtr  = TheMachine.getRegisterPtr();
   uint32_t* MemPtr = TheMachine.getMemoryPtr();
 
-  
+
   while (isNativeRegionEntry(JumpTo)) {
     if(ROIMode && IRRegionsKey.size() >= ROI.RegionID && IRRegionsKey[ROI.RegionID - 1] == EntryAddress) {
       uint64_t start = rdtscp();
@@ -309,16 +324,16 @@ int32_t Manager::jumpToRegion(uint32_t EntryAddress) {
 }
 
 void Manager::reset() {  
-    while (NumOfOIRegions != 0); 
+  while (NumOfOIRegions != 0); 
 
-    OIRegionsKey.clear();
-    OIRegions.clear();
-    CompiledOIRegions.clear();
-    TouchedEntries.clear();
-    NumOfOIRegions = 0;
-    for (auto P : IRRegions)
-        delete P.second;
-    IRRegions.clear();
-    for (unsigned I = 0; I < NATIVE_REGION_SIZE; I++)
-       NativeRegions[I] = 0; 
+  OIRegionsKey.clear();
+  OIRegions.clear();
+  CompiledOIRegions.clear();
+  TouchedEntries.clear();
+  NumOfOIRegions = 0;
+  for (auto P : IRRegions)
+    delete P.second;
+  IRRegions.clear();
+  for (unsigned I = 0; I < NATIVE_REGION_SIZE; I++)
+    NativeRegions[I] = 0; 
 }

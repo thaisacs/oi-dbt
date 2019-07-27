@@ -4,13 +4,13 @@
 
 using namespace dbt;
 
-unsigned CBRSolver::findSimilar(AOSParams::mcStrategyType::ParamsType::DNAType DNA, const std::string &llvmDNA,
+unsigned CBRSolver::findSimilar(AOSParams::mcStrategyType::ParamsType::DNATypes DNA, const std::string &llvmDNA,
     const std::string &oiDNA) {
   unsigned Index = 0;
   
   switch(DNA) {
     int Max;
-    case AOSParams::mcStrategyType::ParamsType::DNAType::llvm:
+    case AOSParams::mcStrategyType::ParamsType::DNATypes::llvm:
       Max = SM->run(llvmDNA, DataSet[Index].llvmDNA);
       for(unsigned i = 1; i < DataSet.size(); i++) {
         int Buffer = SM->run(llvmDNA, DataSet[i].llvmDNA);
@@ -20,7 +20,7 @@ unsigned CBRSolver::findSimilar(AOSParams::mcStrategyType::ParamsType::DNAType D
         }
       }
       break;
-    case AOSParams::mcStrategyType::ParamsType::DNAType::oi:
+    case AOSParams::mcStrategyType::ParamsType::DNATypes::oi:
       Max = SM->run(oiDNA, DataSet[Index].oiDNA);
       for(unsigned i = 1; i < DataSet.size(); i++) {
         int Buffer = SM->run(oiDNA, DataSet[i].oiDNA);
@@ -38,7 +38,7 @@ unsigned CBRSolver::findSimilar(AOSParams::mcStrategyType::ParamsType::DNAType D
 Data CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::string &oiDNA,
     unsigned RegionID) {
   
-  unsigned Index = findSimilar(Params.DNA, llvmDNA, oiDNA);
+  unsigned Index = findSimilar(Params.DNAType, llvmDNA, oiDNA);
   unsigned BestIndex;
   Data D;   
   D.Fitness = 100000000000000;
@@ -70,7 +70,7 @@ Data CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::st
 }
  
 void CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::string &oiDNA) {
-  unsigned Index = findSimilar(Params.DNA, llvmDNA, oiDNA);
+  unsigned Index = findSimilar(Params.DNAType, llvmDNA, oiDNA);
   auto IRO = llvm::make_unique<IROpt>();
   IRO->optimizeIRFunction(M, DataSet[Index].BESTs[0].TAs);
 }
@@ -78,9 +78,12 @@ void CBRSolver::Solve(llvm::Module *M, const std::string &llvmDNA, const std::st
 void CBRSolver::loadDatabase(const std::string &Database) {
   for(const auto & entry : std::experimental::filesystem::directory_iterator(Database)) {
     RegionData RD;
+    
     auto InputBuffer = llvm::MemoryBuffer::getFile((entry.path()).c_str());
+    
     llvm::yaml::Input yin(InputBuffer->get()->getBuffer());
-    for(unsigned i = 0; i < 10; i++) {
+    
+    for(unsigned i = 0; i < Params.DatabaseTAs; i++) {
       Data D;
       RD.BESTs.push_back(D);
     }

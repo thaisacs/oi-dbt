@@ -8,6 +8,7 @@
 #include <AOSMLSolver.hpp>
 #include <CBRSolver.hpp>
 #include <GASolver.hpp>
+#include <RMHCSolver.hpp>
 #include <characterization.hpp>
 #include <database.hpp>
 #include <AOSPasses.hpp>
@@ -37,25 +38,27 @@ namespace dbt {
     
     std::string BinName, BinPath, BinArgs, AOSPath;
     unsigned NOR; //Number Of Regions
-    public:
+  public:
     AOS(bool ROIMode, const std::string&, const std::string&, const std::string&); 
 
     void run(llvm::Module*, OIInstList);
     void run(llvm::Module*, ROIInfo); 
 
-    std::unique_ptr<RegionData> makeDatabaseData(std::unique_ptr<GADNA>, 
+    std::unique_ptr<RegionData> makeDatabaseData(std::unique_ptr<DNA>, 
         const std::string&, const std::string&);
 
     void generateDatabase(std::unique_ptr<RegionData>);
 
     bool isTraining() {
-      return Params.Training;
+      if(Params.Strategy == AOSParams::StrategyType::IC)
+        return true;
+      return false;
     }
 
     bool isCBRSerialized() {
       return Params.mcStrategy.Params.Serialized;
     }
-    private:
+  private:
     void setBinName(const std::string&);
     void iterativeCompilation(llvm::Module*, OIInstList);
     void machineLearning(llvm::Module*, OIInstList);

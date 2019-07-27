@@ -45,6 +45,7 @@ clarg::argBool   MergeOIFlag("-moi", "Merge OI Regions before dumping");
 clarg::argString CustomOptsFlag("-opts", "path to regions optimization list file", "");
 clarg::argInt    ExecsFlag("-execs",  "number of times to execute a binary.", 1);
 clarg::argString BinariesFlag("-bins",  "File with list of binaries to be executed.", "");
+clarg::argString OptPolicyFlag("-level", "optimization level (none, basic, normal, agrresive)", "basic");
 
 #ifdef DEBUG
 clarg::argInt debugFlag ("-d", "Set Debug Level. This value can be 1 or 2 (1 - Less verbosive; 2 - More Verbosive)", 1);
@@ -210,9 +211,10 @@ std::unordered_map<uint32_t, std::vector<std::string>>* loadCustomOpts(std::stri
 }
 
 int main(int argc, char** argv) {
+  srand(time(NULL));
+  
   signal(SIGSEGV, sigHandler);
   signal(SIGABRT, sigHandler);
-
 
   // Parse the arguments
   if (clarg::parse_arguments(argc, argv)) {
@@ -304,7 +306,23 @@ int main(int argc, char** argv) {
     TheManager->setOptPolicy(dbt::Manager::OptPolitic::Custom);
     TheManager->setCustomOpts(loadCustomOpts(CustomOptsFlag.get_value()));
   } else {
-    TheManager->setOptPolicy(dbt::Manager::OptPolitic::Normal);
+    if (OptPolicyFlag.was_set()) {
+      std::string policy = OptPolicyFlag.get_value();
+      if (policy.compare("none") == 0)
+        TheManager->setOptPolicy(dbt::Manager::OptPolitic::None);
+      else if (policy.compare("basic") == 0)
+        TheManager->setOptPolicy(dbt::Manager::OptPolitic::Basic);
+      else if (policy.compare("normal") == 0)
+        TheManager->setOptPolicy(dbt::Manager::OptPolitic::Normal);
+      else if (policy.compare("aggressive") == 0)
+        TheManager->setOptPolicy(dbt::Manager::OptPolitic::Aggressive);
+      else {
+        std::cout << "OptPolicy not found!!!";
+        exit(1);
+      }
+    } else {
+      TheManager->setOptPolicy(dbt::Manager::OptPolitic::Basic);
+    }
   }
 
   TheManager->startCompilationThr();

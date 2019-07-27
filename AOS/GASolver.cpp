@@ -14,15 +14,24 @@ Population::Population(const AOSParams::GASolverParams &Params, llvm::Module* M,
 
   Best = nullptr;
 
-  for(unsigned i = 0; i < BEST10_SET.size(); i++) {
-    Buffer[i] = std::make_unique<GADNA>(Params.Max, Params.Min, 
-        Params.CompileWeight, Params.ExecutionWeight, Params.Times, InitialSearchSpaceType::BEST10);
-  }
+  
+  if(Params.PopulationSize < BEST10_SET.size()) {
+    for(unsigned i = 0; i < Params.PopulationSize; i++) {
+      Buffer[i] = std::make_unique<GADNA>(Params.Max, Params.Min, 
+          Params.CompileWeight, Params.ExecutionWeight, InitialSearchSpaceType::BEST10);
+    }
+  }else {
+    for(unsigned i = 0; i < BEST10_SET.size(); i++) {
+      Buffer[i] = std::make_unique<GADNA>(Params.Max, Params.Min, 
+          Params.CompileWeight, Params.ExecutionWeight, InitialSearchSpaceType::BEST10);
+    }
 
-  for(unsigned i = BEST10_SET.size(); i < Params.PopulationSize; i++) {
-    Buffer[i] = std::make_unique<GADNA>(Params.Max, Params.Min,
-        Params.CompileWeight, Params.ExecutionWeight, Params.Times, InitialSearchSpaceType::RANDOM);
+    for(unsigned i = BEST10_SET.size(); i < Params.PopulationSize; i++) {
+      Buffer[i] = std::make_unique<GADNA>(Params.Max, Params.Min,
+          Params.CompileWeight, Params.ExecutionWeight, InitialSearchSpaceType::RANDOM);
+    }
   }
+  
   
   for(unsigned i = 0; i < Buffer.size(); i++) {
     Buffer[i]->calculateFitness(llvm::CloneModule(*M), RegionID, 
@@ -130,7 +139,7 @@ void Population::print(unsigned Generation, const std::string &Database,
   }
 }
 
-std::unique_ptr<GADNA> GASolver::Solve(llvm::Module* M, unsigned RegionID,
+std::unique_ptr<DNA> GASolver::Solve(llvm::Module* M, unsigned RegionID,
     const std::string &Database, const std::string &BinName) {
   Region = M;
 

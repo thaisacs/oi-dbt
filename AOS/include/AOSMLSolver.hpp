@@ -17,11 +17,11 @@ namespace dbt {
     std::unique_ptr<CodeAnalyzer> CA;
     std::string BinPath, BinArgs, AOSPath;
   public:
-    AOSMLSolver(const AOSParams::SimilarityType &S, const std::string& BinPath, const std::string& BinArgs, 
+    AOSMLSolver(const AOSParams::mcStrategyType::ParamsType::SimilarityType &S, const std::string& BinPath, const std::string& BinArgs, 
         const std::string& AOSPath) : BinPath(BinPath), BinArgs(BinArgs), AOSPath(AOSPath) {
       
       switch(S) {
-        case AOSParams::SimilarityType::NaW:
+        case AOSParams::mcStrategyType::ParamsType::SimilarityType::NaW:
           SM = std::make_unique<NeedlemanWunsch>();
       }
     

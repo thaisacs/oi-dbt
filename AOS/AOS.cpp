@@ -20,13 +20,20 @@ AOS::AOS(bool ROIMode, const std::string &AOSPath, const std::string &BinPath, c
     exit(1);
   }
 
-  ICSolver = std::make_unique<GASolver>(Params.icStrategy.Params.GAParams, 
-      BinPath, BinArgs, AOSPath);
+  switch(Params.icStrategy.Value) {
+    case AOSParams::icStrategyType::GA:
+      ICSolver = std::make_unique<GASolver>(Params.icStrategy.Params.GAParams, 
+          BinPath, BinArgs, AOSPath);
+      break;
+    case AOSParams::icStrategyType::RMHC:
+      ICSolver = std::make_unique<RMHCSolver>(Params.icStrategy.Params.RMHCParams, 
+          BinPath, BinArgs, AOSPath);
+      break;
+  }
 
   switch(Params.mcStrategy.Value) {
     case AOSParams::mcStrategyType::CBR:
-      MLSolver = std::make_unique<CBRSolver>(Params.mcStrategy.Params, Params.SimilarityParam,
-          BinPath, BinArgs, AOSPath);
+      MLSolver = std::make_unique<CBRSolver>(Params.mcStrategy.Params, BinPath, BinArgs, AOSPath);
       break;
     case AOSParams::mcStrategyType::DPL:
       break;
@@ -34,19 +41,19 @@ AOS::AOS(bool ROIMode, const std::string &AOSPath, const std::string &BinPath, c
       break;
   }
 
-  switch(Params.CharacterizationParam) {
-    case AOSParams::CharacterizationType::DNA:
+  switch(Params.mcStrategy.Params.CharacterizationParam) {
+    case AOSParams::mcStrategyType::ParamsType::CharacterizationType::DNA:
       CTZ = std::make_unique<DNAEncoding>();
       break;
-    case AOSParams::CharacterizationType::DND:
+    case AOSParams::mcStrategyType::ParamsType::CharacterizationType::DND:
       break;
-    case AOSParams::CharacterizationType::FLL:
+    case AOSParams::mcStrategyType::ParamsType::CharacterizationType::FLL:
       break;
   }
 
-  if(!ROIMode && !Params.Training)
+  if(!ROIMode && Params.Strategy == AOSParams::StrategyType::ML)
     MLSolver->loadDatabase(Params.Database);
-  else if(!ROIMode && Params.CreateDatabase && Params.Training)
+  else if(!ROIMode && Params.CreateDatabase && Params.Strategy == AOSParams::StrategyType::IC)
     system(("mkdir " + Params.Database).c_str());
 
   setBinName(BinPath);
@@ -58,10 +65,10 @@ AOS::AOS(bool ROIMode, const std::string &AOSPath, const std::string &BinPath, c
 void AOS::run(llvm::Module *M, OIInstList OIRegion) {
   NOR++;
   
-  if(Params.AplyBefore)
+  if(!Params.SequenceBefore.size())
     baseline(M);  
   
-  if(Params.Training)
+  if(Params.Strategy == AOSParams::StrategyType::IC)
     iterativeCompilation(M, OIRegion);
   else
     machineLearning(M, OIRegion);
@@ -79,7 +86,7 @@ void AOS::machineLearning(llvm::Module *M, OIInstList OIRegion) {
   if(Params.mcStrategy.Params.Serialized) {
     auto MLData = MLSolver->Solve(M, llvmDNA, oiDNA, NOR);
     
-    if(Params.DumpData) {
+    if(Params.mcStrategy.Params.DumpData) {
       std::ofstream FileResult;
       std::string HistName = BinName + std::to_string(NOR) + "CBR.txt";
       FileResult.open(HistName, std::ios::app);
@@ -106,13 +113,13 @@ void AOS::iterativeCompilation(llvm::Module *M, OIInstList OIRegion) {
 void AOS::run(llvm::Module *M, ROIInfo R) {
   NOR++;
   
-  if(Params.AplyBefore)
+  if(!Params.SequenceBefore.size())
     baseline(M);  
   
   ICSolver->Solve(M, R, NOR);
 }
 
-std::unique_ptr<RegionData> AOS::makeDatabaseData(std::unique_ptr<GADNA> ICData, 
+std::unique_ptr<RegionData> AOS::makeDatabaseData(std::unique_ptr<DNA> ICData, 
     const std::string& llvmDNA, const std::string& oiDNA) {
   
   auto RD = std::make_unique<RegionData>();

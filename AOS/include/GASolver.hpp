@@ -44,15 +44,13 @@ namespace dbt {
 
   class GASolver : public AOSICSolver {
     AOSParams::GASolverParams Params;
-    std::string BinPath, BinArgs, AOSPath;
     std::unique_ptr<Population> CurrentPopulation;
-    llvm::Module* Region;
   public:
     GASolver(const AOSParams::GASolverParams &Params, const std::string &BinPath,
         const std::string &BinArgs, const std::string &AOSPath) : 
-      AOSICSolver(), Params(Params), BinPath(BinPath), BinArgs(BinArgs), AOSPath(AOSPath) {}
+      Params(Params), AOSICSolver(BinPath, BinArgs, AOSPath) {}
 
-    std::unique_ptr<GADNA> Solve(llvm::Module*, unsigned, 
+    std::unique_ptr<DNA> Solve(llvm::Module*, unsigned, 
         const std::string&, const std::string&) override;
     void Solve(llvm::Module*, ROIInfo, unsigned) override;
     

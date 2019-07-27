@@ -6,7 +6,6 @@
 #define MANAGER_HPP
 
 #include <IREmitter.hpp>
-#include <IROpt.hpp>
 #include <IRJIT.hpp>
 #include <machine.hpp>
 #include <thread>
@@ -20,6 +19,7 @@
 #include <chrono>
 
 #include <AOS.hpp>
+#include <IROpt.hpp>
 #include <util.hpp>
 
 #include "llvm/Support/TargetSelect.h"
@@ -35,7 +35,7 @@ namespace dbt {
 
   class Manager {
     public:
-      enum OptPolitic { None, Normal, Aggressive, Custom };
+      enum OptPolitic { None, Basic, Normal, Aggressive, Custom };
 
     private:
       llvm::LLVMContext TheContext;

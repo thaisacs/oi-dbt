@@ -5,11 +5,10 @@
 
 using namespace dbt;
 
-DNA::DNA(unsigned Size, unsigned Min, double CW, double EW, uint16_t T, InitialSearchSpaceType Type) {
+DNA::DNA(unsigned Size, unsigned Min, double CW, double EW, InitialSearchSpaceType Type) {
 
   CompilationWeight = CW;
   ExecutionWeight = EW;
-  Times = T;
 
   CA = llvm::make_unique<CodeAnalyzer>();
 
@@ -22,10 +21,9 @@ DNA::DNA(unsigned Size, unsigned Min, double CW, double EW, uint16_t T, InitialS
   }
 }
 
-DNA::DNA(double CW, double EW, uint16_t T, std::vector<uint16_t> G) {
+DNA::DNA(double CW, double EW, std::vector<uint16_t> G) {
   CompilationWeight = CW;
   ExecutionWeight = EW;
-  Times = T;
 
   CA = llvm::make_unique<CodeAnalyzer>();
 
@@ -95,7 +93,7 @@ double DNA::getExecutionTime() {
 }
 
 GADNA* GADNA::clone() {
-  auto Clone = new GADNA(CompilationWeight, ExecutionWeight, Times, Genes);
+  auto Clone = new GADNA(CompilationWeight, ExecutionWeight, Genes);
   Clone->setFitness(Fitness);
   Clone->setProbability(Probability);
   Clone->setCompilationTime(CompilationTime);
@@ -114,7 +112,7 @@ GADNA* GADNA::crossover(GADNA* Parent) {
     ChildGenes[i] = Parent->getLocus(i);
   }
 
-  return new GADNA(CompilationWeight, ExecutionWeight, Times, std::move(ChildGenes));
+  return new GADNA(CompilationWeight, ExecutionWeight, std::move(ChildGenes));
 }
 
 void GADNA::mutate(double MutationRate) {
@@ -127,4 +125,62 @@ void GADNA::mutate(double MutationRate) {
 
 void GADNA::calculateProbability(uint64_t Sum) {
   Probability = Sum - Fitness;
+}
+    
+RMHCDNA* RMHCDNA::clone() {
+  auto Clone = new RMHCDNA(CompilationWeight, ExecutionWeight, Genes);
+  Clone->setFitness(Fitness);
+  Clone->setCompilationTime(CompilationTime);
+  Clone->setExecutionTime(ExecutionTime);
+  return Clone;
+}
+
+void RMHCDNA::mutate() {
+  unsigned Opc = getRandomNumber(0, 4);
+  unsigned IndexOne = 0, IndexTwo = 0;
+  unsigned Buffer;
+
+  switch(Opc) {
+    case 0:
+      for(unsigned i = Genes.size()-1; i >= 0; i++) {
+        if(!Genes[i]) { 
+          Genes[i] = getRandomNumber(MIN_OPT, MAX_OPT+1);
+          break;
+        }
+      }
+      break;
+    case 1:
+      for(unsigned i = 0; i < Genes.size(); i++) {
+        if(Genes[i] != 0) {
+          Genes[i] = 0;
+          break;
+        }
+      }
+      break;
+    case 2:
+      IndexOne = getRandomNumber(0, Genes.size());
+      IndexTwo = getRandomNumber(0, Genes.size());
+      Buffer = Genes[IndexOne];
+      Genes[IndexOne] = Genes[IndexTwo];
+      Genes[IndexTwo] = Buffer;
+      break;
+    case 3:
+      IndexOne = getRandomNumber(0, Genes.size());
+      Genes[IndexOne] = getRandomNumber(MIN_OPT, MAX_OPT+1);
+      break;
+    default:
+      std::cerr << "RMHC mutate problem!!!\n";
+  }
+}
+
+void RMHCDNA::print(const std::string& Database, const std::string& BinName, const std::string& NOR) {
+  std::ofstream myHistoric;
+  std::string HistName = Database + BinName + NOR + "H.txt";
+  myHistoric.open(HistName, std::ios::app);
+  for(unsigned i = 0; i < Genes.size(); i++) {
+    myHistoric << Genes[i] << " ";
+  }
+  myHistoric << " - " << " CompilationTime: " << CompilationTime << 
+    " ExecutionTime: " << ExecutionTime << " Fitness " << Fitness << std::endl;
+  myHistoric.close();
 }

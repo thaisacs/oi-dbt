@@ -4,15 +4,10 @@ using namespace dbt;
 using namespace llvm::yaml;
 
 void MappingTraits<AOSParams>::mapping(IO &io, AOSParams &Params) {
-  //io.mapRequired("updateDatabase", Params.UpdateDatabase);
   io.mapRequired("createDatabase", Params.CreateDatabase);
-  io.mapRequired("training", Params.Training);
   io.mapRequired("database", Params.Database);
-  io.mapRequired("dumpData", Params.DumpData);
-  
-  io.mapRequired("aplyBefore", Params.AplyBefore);
   io.mapRequired("sequenceBefore", Params.SequenceBefore);
-  
+  io.mapRequired("strategy", Params.Strategy);
   io.mapRequired("icStrategy", Params.icStrategy.Value);
 
   switch(Params.icStrategy.Value) {
@@ -25,11 +20,6 @@ void MappingTraits<AOSParams>::mapping(IO &io, AOSParams &Params) {
 
   io.mapRequired("mcStrategy", Params.mcStrategy.Value);
   io.mapRequired("mcStrategyParams", Params.mcStrategy.Params);
-
-  io.mapRequired("characterization", Params.CharacterizationParam);
-  //io.mapRequired("retrieving", Params.RetrievingParam);
-  io.mapRequired("similarity", Params.SimilarityParam);
-  //io.mapRequired("invokeIC", Params.InvokeIC);
 }
 
 void ScalarEnumerationTraits<AOSParams::icStrategyType::ValueType>::enumeration(
@@ -43,27 +33,33 @@ void MappingTraits<AOSParams::GASolverParams>::mapping(IO &io,
   io.mapRequired("max", Params.Max);
   io.mapRequired("min", Params.Min);
   io.mapRequired("mutationRate", Params.MutationRate);
-  io.mapRequired("times", Params.Times);
   io.mapRequired("populationSize", Params.PopulationSize);
   io.mapRequired("generations", Params.Generations);
   io.mapRequired("compileWeight", Params.CompileWeight);
   io.mapRequired("executionWeight", Params.ExecutionWeight);
-  //io.mapRequired("diversityThreshold", Params.diversityThreshold);
-  //io.mapRequired("convergenceThreshold", Params.convergenceThreshold);
 }
 
 void MappingTraits<AOSParams::mcStrategyType::ParamsType>::mapping(IO &io, 
     AOSParams::mcStrategyType::ParamsType &Params) {
-  io.mapRequired("DNA", Params.DNA);
+  io.mapRequired("DNA", Params.DNAType);
   io.mapRequired("serialized", Params.Serialized);
+  io.mapRequired("dumpData", Params.DumpData);
   io.mapRequired("compileWeight", Params.CompileWeight);
   io.mapRequired("executionWeight", Params.ExecutionWeight);
+  io.mapRequired("compileWeight", Params.CompileWeight);
+  io.mapRequired("executionWeight", Params.ExecutionWeight);
+  io.mapRequired("characterization", Params.CharacterizationParam);
+  io.mapRequired("similarity", Params.SimilarityParam);
+  io.mapRequired("databaseTAs", Params.DatabaseTAs);
 }
 
 void MappingTraits<AOSParams::RMHCSolverParams>::mapping(IO &io, 
     AOSParams::RMHCSolverParams &Params) {
   io.mapRequired("max", Params.Max);
   io.mapRequired("min", Params.Min);
+  io.mapRequired("compileWeight", Params.CompileWeight);
+  io.mapRequired("executionWeight", Params.ExecutionWeight);
+  io.mapRequired("generations", Params.Generations);
 }
 
 void ScalarEnumerationTraits<AOSParams::mcStrategyType::ValueType>::enumeration(
@@ -78,38 +74,36 @@ void ScalarEnumerationTraits<AOSParams::mcStrategyType::ValueType>::enumeration(
       AOSParams::mcStrategyType::LTL);
 }
 
-void ScalarEnumerationTraits<AOSParams::mcStrategyType::ParamsType::DNAType>::enumeration(
-    IO &io, AOSParams::mcStrategyType::ParamsType::DNAType& Param) {
+void ScalarEnumerationTraits<AOSParams::mcStrategyType::ParamsType::DNATypes>::enumeration(
+    IO &io, AOSParams::mcStrategyType::ParamsType::DNATypes& Param) {
   io.enumCase(Param, "llvm", 
-      AOSParams::mcStrategyType::ParamsType::DNAType::llvm);
+      AOSParams::mcStrategyType::ParamsType::DNATypes::llvm);
   io.enumCase(Param, "oi", 
-      AOSParams::mcStrategyType::ParamsType::DNAType::oi);
+      AOSParams::mcStrategyType::ParamsType::DNATypes::oi);
 }
 
-void ScalarEnumerationTraits<AOSParams::CharacterizationType>::enumeration(
-    IO &io, AOSParams::CharacterizationType& Param) {
+void ScalarEnumerationTraits<AOSParams::mcStrategyType::ParamsType::CharacterizationType>::enumeration(
+    IO &io, AOSParams::mcStrategyType::ParamsType::CharacterizationType& Param) {
   io.enumCase(Param, "DNA", 
-      AOSParams::CharacterizationType::DNA);
+      AOSParams::mcStrategyType::ParamsType::CharacterizationType::DNA);
   io.enumCase(Param, "DND", 
-      AOSParams::CharacterizationType::DND);
+      AOSParams::mcStrategyType::ParamsType::CharacterizationType::DND);
   io.enumCase(Param, "FLL", 
-      AOSParams::CharacterizationType::FLL);
+      AOSParams::mcStrategyType::ParamsType::CharacterizationType::FLL);
 }
 
-//void ScalarEnumerationTraits<AOSParams::RetrievingType>::enumeration(
-//    IO &io, AOSParams::RetrievingType& Param) {
-//  io.enumCase(Param, "ELITE", 
-//      AOSParams::RetrievingType::ELITE);
-//  io.enumCase(Param, "JUST", 
-//      AOSParams::RetrievingType::JUST);
-//  io.enumCase(Param, "NEARLY", 
-//      AOSParams::RetrievingType::NEARLY);
-//}
+void ScalarEnumerationTraits<AOSParams::StrategyType>::enumeration(
+    IO &io, AOSParams::StrategyType& Param) {
+  io.enumCase(Param, "IC", 
+      AOSParams::StrategyType::IC);
+  io.enumCase(Param, "ML", 
+      AOSParams::StrategyType::ML);
+}
 
-void ScalarEnumerationTraits<AOSParams::SimilarityType>::enumeration(
-    IO &io, AOSParams::SimilarityType& Param) {
+void ScalarEnumerationTraits<AOSParams::mcStrategyType::ParamsType::SimilarityType>::enumeration(
+    IO &io, AOSParams::mcStrategyType::ParamsType::SimilarityType& Param) {
   io.enumCase(Param, "NaW", 
-      AOSParams::SimilarityType::NaW);
+      AOSParams::mcStrategyType::ParamsType::SimilarityType::NaW);
   io.enumCase(Param, "CMP", 
-      AOSParams::SimilarityType::CMP);
+      AOSParams::mcStrategyType::ParamsType::SimilarityType::CMP);
 }

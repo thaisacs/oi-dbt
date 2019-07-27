@@ -368,7 +368,7 @@ void IROpt::populatePassManager(llvm::legacy::PassManager* MPM, llvm::legacy::Fu
   }
 }
 
-void dbt::IROpt::populateFuncPassManager(llvm::legacy::FunctionPassManager* FPM, std::vector<std::string> PassesNames) {
+void IROpt::populateFuncPassManager(llvm::legacy::FunctionPassManager* FPM, std::vector<std::string> PassesNames) {
   for (std::string PassName : PassesNames) {
     switch (str2int(PassName.c_str())) {
       case str2int("instcombine"):
@@ -436,29 +436,32 @@ void IROpt::optimizeIRFunction(llvm::Module *M, std::vector<uint16_t> Opts) {
   MPM->run(*M);
 }
 
-void dbt::IROpt::optimizeIRFunction(llvm::Module *M, OptLevel Level, uint32_t EntryAddress, uint32_t ExecNumber, 
-                                std::string BinPath) {
-  // Lazy initialization
-  if (Level == OptLevel::Basic) {
-    if (!BasicPM) {
-      BasicPM = std::make_unique<llvm::legacy::FunctionPassManager>(M);
-      populateFuncPassManager(BasicPM.get(), 
-          {"instcombine", "simplifycfg", "reassociate", "gvn", "die", "dce", "instcombine", "licm", 
-          "memcpyopt", "loop-unswitch", "instcombine", "indvars", "loop-deletion", "loop-predication", "loop-unroll",
-          "simplifycfg", "instcombine", "licm", "gvn"});
-      BasicPM->doInitialization();
+void IROpt::optimizeIRFunction(llvm::Module *M, OptLevel Level, uint32_t EntryAddress) {
+  switch (Level) {
+    case OptLevel::None:
+      // Do not apply optimizations
+      break;
+    case OptLevel::Basic:
+      if (!BasicPM) {
+        BasicPM = std::make_unique<llvm::legacy::FunctionPassManager>(M);
+        populateFuncPassManager(BasicPM.get(), 
+            {"instcombine", "simplifycfg", "reassociate", "gvn", "die", "dce", "instcombine", "licm", 
+            "memcpyopt", "loop-unswitch", "instcombine", "indvars", "loop-deletion", "loop-predication", "loop-unroll",
+            "simplifycfg", "instcombine", "licm", "gvn"});
+        BasicPM->doInitialization();
 
-    }
-    /*    auto MPM = std::make_unique<llvm::legacy::PassManager>();
-          MPM->add(llvm::createFunctionInliningPass());
-          MPM->run(*M);*/
-
-    for (auto& F : *M)
-      BasicPM->run(F);
-  } 
+      }
+      for (auto& F : *M)
+        BasicPM->run(F);
+      break;
+    case OptLevel::Normal:
+      break;
+    case OptLevel::Aggressive:
+      break;
+  }
 }
 
-void dbt::IROpt::customOptimizeIRFunction(llvm::Module* M, std::vector<std::string> Opts) {
+void IROpt::customOptimizeIRFunction(llvm::Module* M, std::vector<std::string> Opts) {
   std::cerr << "Custom opt " << Opts[1] << "\n";
   auto PM = std::make_unique<llvm::legacy::FunctionPassManager>(M);
   populateFuncPassManager(PM.get(), Opts);

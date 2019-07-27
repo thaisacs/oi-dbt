@@ -5,6 +5,7 @@ add_library(AOS
   IROpt.cpp 
   GASolver.cpp
   CBRSolver.cpp
+  RMHCSolver.cpp
   searchSpace.cpp
   codeAnalyzer.cpp
   characterization.cpp
