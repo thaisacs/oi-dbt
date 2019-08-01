@@ -13,7 +13,7 @@ namespace dbt {
   class DNA {
   protected:
     std::unique_ptr<CodeAnalyzer> CA;
-    std::vector<uint16_t> Genes;
+    std::vector<uint16_t> Gene;
     uint64_t ExecutionTime, CompilationTime, Fitness;
     double CompilationWeight, ExecutionWeight;
   public:
@@ -24,7 +24,7 @@ namespace dbt {
         const std::string&, const std::string&);
     
     uint16_t getLocus(unsigned);
-    std::vector<uint16_t> getGenes();
+    std::vector<uint16_t> getGene();
     double getFitness();
     void setFitness(double);
     void setCompilationTime(double);
@@ -36,8 +36,8 @@ namespace dbt {
   class GADNA : public DNA {
     double Probability;
   public:
-    GADNA(double CW, double EW, std::vector<uint16_t> Genes) : 
-      DNA(CW, EW, std::move(Genes)) {} 
+    GADNA(double CW, double EW, std::vector<uint16_t> Gene) : 
+      DNA(CW, EW, std::move(Gene)) {} 
     
     GADNA(unsigned Size, unsigned Min, double CompilationWeight, double ExecutionWeight, 
         InitialSearchSpaceType Type) : 
@@ -54,8 +54,8 @@ namespace dbt {
 
   class RMHCDNA : public DNA {
   public:
-    RMHCDNA(double CW, double EW, std::vector<uint16_t> Genes) : 
-      DNA(CW, EW, std::move(Genes)) {} 
+    RMHCDNA(double CW, double EW, std::vector<uint16_t> Gene) : 
+      DNA(CW, EW, std::move(Gene)) {} 
     
     RMHCDNA(unsigned Size, unsigned Min, double CompilationWeight, double ExecutionWeight, 
         InitialSearchSpaceType Type) : 
@@ -63,6 +63,32 @@ namespace dbt {
     
     RMHCDNA* clone();
     void mutate();
+    void print(const std::string&, const std::string&, const std::string&);
+  };
+
+  class SRMHCDNA : public DNA {
+  public:
+    SRMHCDNA(std::vector<uint16_t> Gene) : 
+      DNA(0, 0, std::move(Gene)) {} 
+    
+    SRMHCDNA(unsigned Size, unsigned Min, InitialSearchSpaceType Type) : 
+      DNA(Size, Min, 0, 0, Type) {}
+    
+    void mutate();
+    SRMHCDNA* clone();
+    void print(const std::string&, const std::string&, const std::string&);
+  };
+  
+  class RANDOMDNA : public DNA {
+  public:
+    RANDOMDNA(std::vector<uint16_t> Gene) : 
+      DNA(0, 0, std::move(Gene)) {} 
+    
+    RANDOMDNA(unsigned Size, unsigned Min, InitialSearchSpaceType Type) : 
+      DNA(Size, Min, 0, 0, Type) {}
+    
+    void mutate();
+    RANDOMDNA* clone();
     void print(const std::string&, const std::string&, const std::string&);
   };
 }

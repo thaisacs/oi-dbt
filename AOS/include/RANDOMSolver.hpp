@@ -6,12 +6,11 @@
 
 namespace dbt {
   struct ROIInfo;
-  class RMHCSolver : public AOSICSolver {
-    AOSParams::RMHCSolverParams Params;
-    std::unique_ptr<RMHCDNA> Best;
-    std::unique_ptr<RMHCDNA> Current;
+  class RANDOMSolver : public AOSICSolver {
+    AOSParams::RANDOMSolverParams Params;
+    std::vector<std::unique_ptr<RANDOMDNA>> TAs;
   public:
-    RMHCSolver(const AOSParams::RMHCSolverParams &Params, const std::string &BinPath,
+    RANDOMSolver(const AOSParams::RANDOMSolverParams &Params, const std::string &BinPath,
         const std::string &BinArgs, const std::string &AOSPath) : Params(Params), 
     AOSICSolver(BinPath, BinArgs, AOSPath) {}
     
@@ -19,6 +18,5 @@ namespace dbt {
         const std::string&) override;
     void Solve(llvm::Module*, ROIInfo, unsigned) override;
     void Evaluate(unsigned, const std::string&, const std::string&) override;
-    void setBest();
   };
 }

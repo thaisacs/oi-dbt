@@ -149,9 +149,6 @@ std::unique_ptr<DNA> GASolver::Solve(llvm::Module* M, unsigned RegionID,
   CurrentPopulation->setBest();
   Evaluate(RegionID, Database, BinName);
     
-  auto IRO = llvm::make_unique<IROpt>();
-  IRO->optimizeIRFunction(M, CurrentPopulation->getBestTAs());
-
   return std::move(CurrentPopulation->getBest());
 }
 
@@ -166,15 +163,16 @@ void GASolver::Evaluate(unsigned RegionID, const std::string &Database,
     const std::string &BinName) {
   unsigned Generation = 1;
 
-  CurrentPopulation->print(0, Database, BinName, std::to_string(RegionID));
+  if(Params.DumpData)
+    CurrentPopulation->print(0, Database, BinName, std::to_string(RegionID));
 
   while(Generation < Params.Generations) {
     CurrentPopulation->crossover(Params.MutationRate);
     CurrentPopulation->calculateFitness(Region, RegionID, BinPath, BinArgs, AOSPath);
     CurrentPopulation->calculateProbability();
     CurrentPopulation->setBest();
-    CurrentPopulation->print(Generation, Database, BinName, 
-        std::to_string(RegionID));
+    if(Params.DumpData)
+      CurrentPopulation->print(Generation, Database, BinName, std::to_string(RegionID));
 
     Generation++; 
   }

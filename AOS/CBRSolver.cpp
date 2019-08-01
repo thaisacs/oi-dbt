@@ -4,13 +4,13 @@
 
 using namespace dbt;
 
-unsigned CBRSolver::findSimilar(AOSParams::mcStrategyType::ParamsType::DNATypes DNA, const std::string &llvmDNA,
+unsigned CBRSolver::findSimilar(AOSParams::mlStrategyType::ParamsType::DNATypes DNA, const std::string &llvmDNA,
     const std::string &oiDNA) {
   unsigned Index = 0;
   
   switch(DNA) {
     int Max;
-    case AOSParams::mcStrategyType::ParamsType::DNATypes::llvm:
+    case AOSParams::mlStrategyType::ParamsType::DNATypes::llvm:
       Max = SM->run(llvmDNA, DataSet[Index].llvmDNA);
       for(unsigned i = 1; i < DataSet.size(); i++) {
         int Buffer = SM->run(llvmDNA, DataSet[i].llvmDNA);
@@ -20,7 +20,7 @@ unsigned CBRSolver::findSimilar(AOSParams::mcStrategyType::ParamsType::DNATypes 
         }
       }
       break;
-    case AOSParams::mcStrategyType::ParamsType::DNATypes::oi:
+    case AOSParams::mlStrategyType::ParamsType::DNATypes::oi:
       Max = SM->run(oiDNA, DataSet[Index].oiDNA);
       for(unsigned i = 1; i < DataSet.size(); i++) {
         int Buffer = SM->run(oiDNA, DataSet[i].oiDNA);

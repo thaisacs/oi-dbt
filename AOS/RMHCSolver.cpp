@@ -28,12 +28,14 @@ void RMHCSolver::Evaluate(unsigned RegionID, const std::string &Database,
     const std::string &BinName) {
   unsigned Generation = 1;
   
-  Current->print(Database, BinName, std::to_string(RegionID));
+  if(Params.DumpData)
+    Current->print(Database, BinName, std::to_string(RegionID));
 
   while(Generation < Params.Generations) {
     Current->mutate();
     Current->calculateFitness(llvm::CloneModule(*Region), RegionID, BinPath, BinArgs, AOSPath);
-    Current->print(Database, BinName, std::to_string(RegionID));
+    if(Params.DumpData)
+      Current->print(Database, BinName, std::to_string(RegionID));
     setBest();
     
     ++Generation;

@@ -6,7 +6,6 @@
 
 namespace dbt {
   struct AOSParams {
-    //bool UpdateDatabase;
     bool CreateDatabase;
     std::string Database;
     
@@ -18,29 +17,39 @@ namespace dbt {
 
     struct SolverParams {
       unsigned Max, Min;
+      bool DumpData;
+    };
+
+    struct GASolverParams : public SolverParams {
+      unsigned Generations;
+      double CompileWeight;
+      double ExecutionWeight;
+      double MutationRate;
+      unsigned PopulationSize;
+    };
+
+    struct RMHCSolverParams : public SolverParams {
       unsigned Generations;
       double CompileWeight;
       double ExecutionWeight;
     };
 
-    struct GASolverParams : public SolverParams {
-      double MutationRate;
-      unsigned PopulationSize;
-    };
-
-    struct RMHCSolverParams : public SolverParams {};
-
+    struct SRMHCSolverParams : public SolverParams {};
+    struct RANDOMSolverParams : public SolverParams {};
+    
     struct icStrategyType {
       enum ValueType {
-        GA, RMHC
+        GA, RMHC, SRMHC, RANDOM
       } Value;
       union ParamsType {
         GASolverParams GAParams;
         RMHCSolverParams RMHCParams;
+        SRMHCSolverParams SRMHCParams;
+        RANDOMSolverParams RANDOMParams;
       } Params;
     } icStrategy;
 
-    struct mcStrategyType {
+    struct mlStrategyType {
       enum ValueType {
         CBR, DPL, RFL, LTL
       } Value;
@@ -60,7 +69,7 @@ namespace dbt {
           DNA, DND, FLL
         } CharacterizationParam;
       } Params;
-    } mcStrategy;
+    } mlStrategy;
   };
 }
 
@@ -78,30 +87,38 @@ template <> struct llvm::yaml::MappingTraits<dbt::AOSParams::GASolverParams> {
   static void mapping(llvm::yaml::IO &io, dbt::AOSParams::GASolverParams&);
 };
 
-template <> struct llvm::yaml::MappingTraits<dbt::AOSParams::mcStrategyType::ParamsType> {
-  static void mapping(llvm::yaml::IO &io, dbt::AOSParams::mcStrategyType::ParamsType&);
+template <> struct llvm::yaml::MappingTraits<dbt::AOSParams::mlStrategyType::ParamsType> {
+  static void mapping(llvm::yaml::IO &io, dbt::AOSParams::mlStrategyType::ParamsType&);
 };
 
 template <> struct llvm::yaml::MappingTraits<dbt::AOSParams::RMHCSolverParams> {
   static void mapping(llvm::yaml::IO &, dbt::AOSParams::RMHCSolverParams&);
 };
 
+template <> struct llvm::yaml::MappingTraits<dbt::AOSParams::SRMHCSolverParams> {
+  static void mapping(llvm::yaml::IO &, dbt::AOSParams::SRMHCSolverParams&);
+};
+
+template <> struct llvm::yaml::MappingTraits<dbt::AOSParams::RANDOMSolverParams> {
+  static void mapping(llvm::yaml::IO &, dbt::AOSParams::RANDOMSolverParams&);
+};
+
 template <>
-struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::ValueType> {
+struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mlStrategyType::ValueType> {
   static void enumeration(llvm::yaml::IO&, 
-      dbt::AOSParams::mcStrategyType::ValueType&);
+      dbt::AOSParams::mlStrategyType::ValueType&);
 };
 
-template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::ParamsType::DNATypes> {
-  static void enumeration(llvm::yaml::IO &, dbt::AOSParams::mcStrategyType::ParamsType::DNATypes&);
+template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mlStrategyType::ParamsType::DNATypes> {
+  static void enumeration(llvm::yaml::IO &, dbt::AOSParams::mlStrategyType::ParamsType::DNATypes&);
 };
 
-template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::ParamsType::CharacterizationType> {
-  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::mcStrategyType::ParamsType::CharacterizationType&);
+template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mlStrategyType::ParamsType::CharacterizationType> {
+  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::mlStrategyType::ParamsType::CharacterizationType&);
 };
 
-template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mcStrategyType::ParamsType::SimilarityType> {
-  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::mcStrategyType::ParamsType::SimilarityType&);
+template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::mlStrategyType::ParamsType::SimilarityType> {
+  static void enumeration(llvm::yaml::IO &io, dbt::AOSParams::mlStrategyType::ParamsType::SimilarityType&);
 };
 
 template <> struct llvm::yaml::ScalarEnumerationTraits<dbt::AOSParams::StrategyType> {

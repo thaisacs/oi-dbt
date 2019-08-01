@@ -9,6 +9,8 @@
 #include <CBRSolver.hpp>
 #include <GASolver.hpp>
 #include <RMHCSolver.hpp>
+#include <SRMHCSolver.hpp>
+#include <RANDOMSolver.hpp>
 #include <characterization.hpp>
 #include <database.hpp>
 #include <AOSPasses.hpp>
@@ -56,8 +58,10 @@ namespace dbt {
     }
 
     bool isCBRSerialized() {
-      return Params.mcStrategy.Params.Serialized;
+      return Params.mlStrategy.Params.Serialized;
     }
+    
+    void reset() { NOR = 0; }
   private:
     void setBinName(const std::string&);
     void iterativeCompilation(llvm::Module*, OIInstList);

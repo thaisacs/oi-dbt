@@ -6,15 +6,16 @@ sequenceBefore: []
 
 # SECTION 1: Iterative Compilation
 
-icStrategy: GA
-icStrategyParams:
-  populationSize: 2 
-  generations: 2
-  mutationRate: 0.016
-  compileWeight: 0.1 
-  executionWeight: 0.9 
-  max: 25 
-  min: 10
+#icStrategy: GA
+#icStrategyParams:
+#  dumpData: false
+#  populationSize: 2 
+#  generations: 2
+#  mutationRate: 0.016
+#  compileWeight: 0.1 
+#  executionWeight: 0.9 
+#  max: 25 
+#  min: 10
 
 #icStrategy: RMHC 
 #icStrategyParams:
@@ -24,12 +25,24 @@ icStrategyParams:
 #  max: 25 
 #  min: 10
 
+#icStrategy: SRMHC 
+#icStrategyParams:
+#  dumpData: true 
+#  max: 25 
+#  min: 10
+
+icStrategy: RANDOM 
+icStrategyParams:
+  dumpData: false
+  max: 25 
+  min: 10
+
 createDatabase: true
 
 # SECTION 2: Machine Learning
 
-mcStrategy: CBR
-mcStrategyParams:
+mlStrategy: CBR
+mlStrategyParams:
   DNA: oi # {llvm or oi}
   serialized: false 
   compileWeight: 0.1
@@ -37,4 +50,4 @@ mcStrategyParams:
   characterization: DNA
   similarity: NaW
   dumpData: false
-  databaseTAs: 1
+  databaseTAs: 10

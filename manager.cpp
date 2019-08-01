@@ -162,7 +162,6 @@ void Manager::runPipeline() {
           Size += BB.size();
       
       // if (!isRunning) return;
-
       if(!TheAOS) {
         //if (OptMode != OptPolitic::Custom)
         //  IRO->optimizeIRFunction(Module, IROpt::OptLevel::Basic, EntryAddress);
@@ -325,6 +324,9 @@ int32_t Manager::jumpToRegion(uint32_t EntryAddress) {
 
 void Manager::reset() {  
   while (NumOfOIRegions != 0); 
+
+  if(TheAOS)
+    TheAOS->reset();
 
   OIRegionsKey.clear();
   OIRegions.clear();

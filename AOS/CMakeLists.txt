@@ -6,6 +6,8 @@ add_library(AOS
   GASolver.cpp
   CBRSolver.cpp
   RMHCSolver.cpp
+  SRMHCSolver.cpp
+  RANDOMSolver.cpp
   searchSpace.cpp
   codeAnalyzer.cpp
   characterization.cpp

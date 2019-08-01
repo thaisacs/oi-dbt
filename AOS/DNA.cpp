@@ -13,39 +13,39 @@ DNA::DNA(unsigned Size, unsigned Min, double CW, double EW, InitialSearchSpaceTy
   CA = llvm::make_unique<CodeAnalyzer>();
 
   if(Type == InitialSearchSpaceType::RANDOM) {
-    Genes = std::move(SearchSpace::generateRandomSpace(Size, Min));
+    Gene = std::move(SearchSpace::generateRandomSpace(Size, Min));
   }else if(Type == InitialSearchSpaceType::BEST10) {
-    Genes = std::move(SearchSpace::generateBest10Space(Size));
+    Gene = std::move(SearchSpace::generateBest10Space(Size));
   }else if(Type == InitialSearchSpaceType::ZERO) {
-    Genes = std::move(SearchSpace::generateZeroSpace(Size));
+    Gene = std::move(SearchSpace::generateZeroSpace(Size));
   }
 }
 
 DNA::DNA(double CW, double EW, std::vector<uint16_t> G) {
   CompilationWeight = CW;
   ExecutionWeight = EW;
-
+  
   CA = llvm::make_unique<CodeAnalyzer>();
 
-  Genes = std::move(G);
+  Gene = std::move(G);
 }
 
 void DNA::calculateFitness(std::unique_ptr<llvm::Module> M, unsigned RegionID, 
     const std::string &BinPath, const std::string &BinArgs, const std::string &AOSPath) {
   uint64_t OptTime;  
-  OptTime = CA->getOptTime(M.get(), Genes);	
+  OptTime = CA->getOptTime(M.get(), Gene);	
   CompilationTime = CA->getCompilationTime(std::move(M));
-  ExecutionTime = CA->getExecutionTime(Genes, RegionID, BinPath, BinArgs, AOSPath);
+  ExecutionTime = CA->getExecutionTime(Gene, RegionID, BinPath, BinArgs, AOSPath);
   CompilationTime += OptTime;
   Fitness = CompilationWeight*CompilationTime + ExecutionWeight*ExecutionTime;
 }
 
 uint16_t DNA::getLocus(unsigned Index) {
-  return Genes[Index];
+  return Gene[Index];
 }
 
-std::vector<uint16_t> DNA::getGenes() {
-  return Genes;
+std::vector<uint16_t> DNA::getGene() {
+  return Gene;
 }
 
 double DNA::getFitness() {
@@ -60,8 +60,8 @@ void GADNA::print(const std::string& Database, const std::string& BinName, const
   std::ofstream myHistoric;
   std::string HistName = Database + BinName + NOR + "H.txt";
   myHistoric.open(HistName, std::ios::app);
-  for(unsigned i = 0; i < Genes.size(); i++) {
-    myHistoric << Genes[i] << " ";
+  for(unsigned i = 0; i < Gene.size(); i++) {
+    myHistoric << Gene[i] << " ";
   }
   myHistoric << " - " << " CompilationTime: " << CompilationTime << 
     " ExecutionTime: " << ExecutionTime << " Fitness " << Fitness << " Probability " << Probability << std::endl;
@@ -93,7 +93,7 @@ double DNA::getExecutionTime() {
 }
 
 GADNA* GADNA::clone() {
-  auto Clone = new GADNA(CompilationWeight, ExecutionWeight, Genes);
+  auto Clone = new GADNA(CompilationWeight, ExecutionWeight, Gene);
   Clone->setFitness(Fitness);
   Clone->setProbability(Probability);
   Clone->setCompilationTime(CompilationTime);
@@ -102,24 +102,24 @@ GADNA* GADNA::clone() {
 }
 
 GADNA* GADNA::crossover(GADNA* Parent) {
-  std::vector<uint16_t> ChildGenes(Genes.size());
+  std::vector<uint16_t> ChildGene(Gene.size());
 
-  for(unsigned i = 0; i < Genes.size()/2; i++) {
-    ChildGenes[i] = Genes[i];
+  for(unsigned i = 0; i < Gene.size()/2; i++) {
+    ChildGene[i] = Gene[i];
   }
 
-  for(unsigned i = Genes.size()/2; i < Genes.size(); i++) {
-    ChildGenes[i] = Parent->getLocus(i);
+  for(unsigned i = Gene.size()/2; i < Gene.size(); i++) {
+    ChildGene[i] = Parent->getLocus(i);
   }
 
-  return new GADNA(CompilationWeight, ExecutionWeight, std::move(ChildGenes));
+  return new GADNA(CompilationWeight, ExecutionWeight, std::move(ChildGene));
 }
 
 void GADNA::mutate(double MutationRate) {
-  for(unsigned i = 0; i < Genes.size(); i++) {
+  for(unsigned i = 0; i < Gene.size(); i++) {
     double Random = getRandomRate();
     if(Random <= MutationRate)
-      Genes[i] = getRandomNumber(MIN_OPT, MAX_OPT+1);
+      Gene[i] = getRandomNumber(MIN_OPT, MAX_OPT+1);
   }
 }
 
@@ -128,7 +128,7 @@ void GADNA::calculateProbability(uint64_t Sum) {
 }
     
 RMHCDNA* RMHCDNA::clone() {
-  auto Clone = new RMHCDNA(CompilationWeight, ExecutionWeight, Genes);
+  auto Clone = new RMHCDNA(CompilationWeight, ExecutionWeight, Gene);
   Clone->setFitness(Fitness);
   Clone->setCompilationTime(CompilationTime);
   Clone->setExecutionTime(ExecutionTime);
@@ -142,31 +142,31 @@ void RMHCDNA::mutate() {
 
   switch(Opc) {
     case 0:
-      for(unsigned i = Genes.size()-1; i >= 0; i++) {
-        if(!Genes[i]) { 
-          Genes[i] = getRandomNumber(MIN_OPT, MAX_OPT+1);
+      for(unsigned i = Gene.size()-1; i >= 0; i++) {
+        if(!Gene[i]) { 
+          Gene[i] = getRandomNumber(MIN_OPT, MAX_OPT+1);
           break;
         }
       }
       break;
     case 1:
-      for(unsigned i = 0; i < Genes.size(); i++) {
-        if(Genes[i] != 0) {
-          Genes[i] = 0;
+      for(unsigned i = 0; i < Gene.size(); i++) {
+        if(Gene[i] != 0) {
+          Gene[i] = 0;
           break;
         }
       }
       break;
     case 2:
-      IndexOne = getRandomNumber(0, Genes.size());
-      IndexTwo = getRandomNumber(0, Genes.size());
-      Buffer = Genes[IndexOne];
-      Genes[IndexOne] = Genes[IndexTwo];
-      Genes[IndexTwo] = Buffer;
+      IndexOne = getRandomNumber(0, Gene.size());
+      IndexTwo = getRandomNumber(0, Gene.size());
+      Buffer = Gene[IndexOne];
+      Gene[IndexOne] = Gene[IndexTwo];
+      Gene[IndexTwo] = Buffer;
       break;
     case 3:
-      IndexOne = getRandomNumber(0, Genes.size());
-      Genes[IndexOne] = getRandomNumber(MIN_OPT, MAX_OPT+1);
+      IndexOne = getRandomNumber(0, Gene.size());
+      Gene[IndexOne] = getRandomNumber(MIN_OPT, MAX_OPT+1);
       break;
     default:
       std::cerr << "RMHC mutate problem!!!\n";
@@ -177,10 +177,86 @@ void RMHCDNA::print(const std::string& Database, const std::string& BinName, con
   std::ofstream myHistoric;
   std::string HistName = Database + BinName + NOR + "H.txt";
   myHistoric.open(HistName, std::ios::app);
-  for(unsigned i = 0; i < Genes.size(); i++) {
-    myHistoric << Genes[i] << " ";
+  for(unsigned i = 0; i < Gene.size(); i++) {
+    myHistoric << Gene[i] << " ";
   }
   myHistoric << " - " << " CompilationTime: " << CompilationTime << 
     " ExecutionTime: " << ExecutionTime << " Fitness " << Fitness << std::endl;
+  myHistoric.close();
+}
+
+void SRMHCDNA::mutate() {
+  unsigned Opc = getRandomNumber(0, 4);
+  unsigned IndexOne = 0, IndexTwo = 0;
+  unsigned Buffer;
+
+  switch(Opc) {
+    case 0:
+      for(unsigned i = Gene.size()-1; i >= 0; i++) {
+        if(!Gene[i]) { 
+          Gene[i] = getRandomNumber(MIN_OPT, MAX_OPT+1);
+          break;
+        }
+      }
+      break;
+    case 1:
+      for(unsigned i = 0; i < Gene.size(); i++) {
+        if(Gene[i] != 0) {
+          Gene[i] = 0;
+          break;
+        }
+      }
+      break;
+    case 2:
+      IndexOne = getRandomNumber(0, Gene.size());
+      IndexTwo = getRandomNumber(0, Gene.size());
+      Buffer = Gene[IndexOne];
+      Gene[IndexOne] = Gene[IndexTwo];
+      Gene[IndexTwo] = Buffer;
+      break;
+    case 3:
+      IndexOne = getRandomNumber(0, Gene.size());
+      Gene[IndexOne] = getRandomNumber(MIN_OPT, MAX_OPT+1);
+      break;
+    default:
+      std::cerr << "SRMHC mutate problem!!!\n";
+  }
+}
+
+SRMHCDNA* SRMHCDNA::clone() {
+  auto Clone = new SRMHCDNA(Gene);
+  Clone->setFitness(0);
+  Clone->setCompilationTime(0);
+  Clone->setExecutionTime(0);
+  return Clone;
+}
+
+void SRMHCDNA::print(const std::string& Database, const std::string& BinName, const std::string& NOR) {
+  std::ofstream myHistoric;
+  std::string HistName = Database + BinName + NOR + "H.txt";
+  myHistoric.open(HistName, std::ios::app);
+  for(unsigned i = 0; i < Gene.size(); i++) {
+    myHistoric << Gene[i] << " ";
+  }
+  myHistoric << std::endl;
+  myHistoric.close();
+}
+
+RANDOMDNA* RANDOMDNA::clone() {
+  auto Clone = new RANDOMDNA(Gene);
+  Clone->setFitness(0);
+  Clone->setCompilationTime(0);
+  Clone->setExecutionTime(0);
+  return Clone;
+}
+
+void RANDOMDNA::print(const std::string& Database, const std::string& BinName, const std::string& NOR) {
+  std::ofstream myHistoric;
+  std::string HistName = Database + BinName + NOR + "H.txt";
+  myHistoric.open(HistName, std::ios::app);
+  for(unsigned i = 0; i < Gene.size(); i++) {
+    myHistoric << Gene[i] << " ";
+  }
+  myHistoric << std::endl;
   myHistoric.close();
 }
